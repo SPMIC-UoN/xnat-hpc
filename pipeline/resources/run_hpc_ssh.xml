@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pip:Resource xmlns:pip="http://nrg.wustl.edu/pipeline">
+	<pip:name>run_hpc_ssh</pip:name>
+	<pip:location>/home/xnat/bin</pip:location>
+	<pip:type>Executable</pip:type>
+	<pip:description>Runs command on HPC via SSH</pip:description>
+	<pip:input>
+		<pip:argument id="host" >
+			<pip:description>XNAT host</pip:description>
+		</pip:argument>
+		<pip:argument id="project" >
+			<pip:description>Project name</pip:description>
+		</pip:argument>
+		<pip:argument id="subject" >
+			<pip:description>Subject name</pip:description>
+		</pip:argument>
+		<pip:argument id="session" >
+			<pip:description>Session name</pip:description>
+		</pip:argument>
+		<pip:argument id="command" >
+			<pip:description>Command to run</pip:description>
+		</pip:argument>
+	</pip:input>
+</pip:Resource>

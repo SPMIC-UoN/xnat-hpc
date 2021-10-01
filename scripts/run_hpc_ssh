@@ -1,0 +1,31 @@
+#!/bin/bash
+#
+# This is an XNAT pipeline script that runs a remote command on 
+# the HPC
+#
+# It requires that /home/xnat/bin/ssh-init-tomcat.sh has been executed
+# which starts ssh-agent, adds the authentication key and writes the config
+# to the file /home/xnat/bin/ssh-agent-tomcat-env
+#
+# Usage: run_hpc_ssh <XNAT host URL> <Project ID> <Subject ID> <Experiment ID> <Command to run>
+# 
+XNAT_HOME=/home/xnat
+XNAT_SSH_ENV=$XNAT_HOME/bin/ssh-agent-tomcat-env
+XNAT_SSH_KEY=$XNAT_HOME/.ssh/id_rsa
+XNAT_USER=service_xnat_hpc
+XNAT_HPC_LOGIN=login001.augusta.nottingham.ac.uk
+XNAT_HPC_CODE_FOLDER=code/xnat_commands
+
+echo "run_hpc_ssh.sh"
+echo $@
+. $XNAT_SSH_ENV
+
+HOST=$1
+PROJ=$2
+SUBJ=$3
+EXP=$4
+CMD=$5
+ssh -t -i $XNAT_SSH_KEY $XNAT_USER@$XNAT_HPC_LOGIN << EOF
+$XNAT_HPC_CODE_FOLDER/$CMD.sh $HOST $PROJ $SUBJ $EXP
+EOF
+
