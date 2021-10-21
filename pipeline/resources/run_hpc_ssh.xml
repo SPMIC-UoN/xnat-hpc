@@ -8,6 +8,9 @@
 		<pip:argument id="host" >
 			<pip:description>XNAT host</pip:description>
 		</pip:argument>
+		<pip:argument id="jsession" >
+			<pip:description>XNAT session token</pip:description>
+		</pip:argument>
 		<pip:argument id="project" >
 			<pip:description>Project name</pip:description>
 		</pip:argument>

@@ -82,6 +82,9 @@
                                 <argument id="host">
                                         <value>^concat('"',/Pipeline/parameters/parameter[name='host']/values/unique/text(),'"')^</value>
                                 </argument>
+                                <argument id="jsession">
+                                        <value>^concat('"',/Pipeline/parameters/parameter[name='JSESSION']/values/unique/text(),'"')^</value>
+                                </argument>
                                 <argument id="project">
                                         <value>^concat('"',/Pipeline/parameters/parameter[name='projectID']/values/unique/text(),'"')^</value>
                                 </argument>
