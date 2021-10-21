@@ -9,23 +9,16 @@
 #
 # Usage: run_hpc_ssh <XNAT host URL> <Project ID> <Subject ID> <Experiment ID> <Command to run>
 # 
-XNAT_HOME=/home/xnat
-XNAT_SSH_ENV=$XNAT_HOME/bin/ssh-agent-tomcat-env
-XNAT_SSH_KEY=$XNAT_HOME/.ssh/id_rsa
-XNAT_USER=service_xnat_hpc
-XNAT_HPC_LOGIN=login001.augusta.nottingham.ac.uk
-XNAT_HPC_CODE_FOLDER=code/xnat_commands
-
 echo "run_hpc_ssh.sh"
 echo $@
-. $XNAT_SSH_ENV
-
+. /home/xnat/bin/ssh-agent-tomcat-env
 HOST=$1
-PROJ=$2
-SUBJ=$3
-EXP=$4
-CMD=$5
-ssh -t -i $XNAT_SSH_KEY $XNAT_USER@$XNAT_HPC_LOGIN << EOF
-$XNAT_HPC_CODE_FOLDER/$CMD.sh $HOST $PROJ $SUBJ $EXP
+JSESSION=$2
+PROJ=$3
+SUBJ=$4
+EXP=$5
+CMD=$6
+ssh -t -i /home/xnat/bin/key service_hpc_xnat@login001.augusta.nottingham.ac.uk << EOF
+code/xnat_commands/$CMD $HOST $JSESSION $PROJ $SUBJ $EXP
 EOF
 
