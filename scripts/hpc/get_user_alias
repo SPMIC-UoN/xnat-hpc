@@ -1,0 +1,21 @@
+#!/gpfs01/software/imaging/miniconda3/envs/xnat/bin/python
+"""
+Script to generate a user alias token from XNAT given an activate JSESSIONID
+
+This is needed so that a pipeline task running on the HPC can upload data as
+the user that started the pipeline even though the session may have expired
+by the time the pipeline has run.
+"""
+import sys
+import requests
+import json
+
+host_url = sys.argv[1]
+jsessionid = sys.argv[2]
+
+r = requests.get("%s/data/services/tokens/issue" % host_url, cookies={"JSESSIONID" : jsessionid})  
+if r.status_code != 200:
+    sys.exit(1)
+else:
+    result = json.loads(r.text)
+    print(result["alias"], result["secret"])
