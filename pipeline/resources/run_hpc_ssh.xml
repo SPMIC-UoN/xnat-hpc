@@ -23,5 +23,8 @@
 		<pip:argument id="command" >
 			<pip:description>Command to run</pip:description>
 		</pip:argument>
+		<pip:argument id="args" >
+			<pip:description>Optional arguments to command</pip:description>
+		</pip:argument>
 	</pip:input>
 </pip:Resource>

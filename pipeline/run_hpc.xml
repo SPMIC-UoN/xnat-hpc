@@ -53,9 +53,16 @@
 			<parameter>
 				<name>command</name>
 				<values>
-					<csv>test_cmd</csv>
+					<csv>test</csv>
 				</values>
 				<description>Name of command to run</description>
+			</parameter>
+			<parameter>
+				<name>args</name>
+				<values>
+					<csv></csv>
+				</values>
+				<description>Optional arguments to command</description>
 			</parameter>
 		</input-parameters>
 	</documentation>
@@ -77,7 +84,7 @@
 		</parameter>
 	</parameters>
 	<steps>
-		<step id="1" description="Create NIFTI output folder and a subfolder for each scan" workdirectory="^/Pipeline/parameters/parameter[name='workdir']/values/unique/text()^">
+		<step id="1" description="Run remote command on HPC" workdirectory="^/Pipeline/parameters/parameter[name='workdir']/values/unique/text()^">
                         <resource name="run_hpc_ssh" location="msc/resources">
                                 <argument id="host">
                                         <value>^concat('"',/Pipeline/parameters/parameter[name='host']/values/unique/text(),'"')^</value>
@@ -96,6 +103,9 @@
                                 </argument>
                                 <argument id="command">
                                         <value>^concat('"',/Pipeline/parameters/parameter[name='command']/values/unique/text(),'"')^</value>
+                                </argument>
+                                <argument id="args">
+                                        <value>^concat('"',/Pipeline/parameters/parameter[name='args']/values/unique/text(),'"')^</value>
                                 </argument>
                         </resource>
 		</step>
