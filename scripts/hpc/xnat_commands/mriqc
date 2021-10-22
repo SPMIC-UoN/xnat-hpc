@@ -11,7 +11,7 @@ EXP=$5
 ARGS=$6
 
 # Create working directory
-SCRIPTNAME=`basename "$0"
+SCRIPTNAME=`basename "$0"`
 WORKDIR=`mktemp -d -p $HOME/tmp $SCRIPTNAME_XXXXXX`
 
 {
