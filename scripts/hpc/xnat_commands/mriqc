@@ -27,12 +27,15 @@ CREDENTIALS=($CREDENTIALS)
 echo "Obtained user alias token - alias: ${CREDENTIALS[0]}"
 
 # Get session scans into a temp dir in BIDS format as required for mriqc
-xnatc --xnat=$HOST --project=$PROJ --subject=$SUB --experiment=$EXP --user=${CREDENTIALS[0]} --password=${CREDENTIALS[1]} --download=$WORKDIR --download-format=bids
-echo "Downloaded BIDS data to: $WORKDIR"
+BIDSDIR=$WORKDIR/bids
+xnatc --xnat=$HOST --project=$PROJ --subject=$SUB --experiment=$EXP --user=${CREDENTIALS[0]} --password=${CREDENTIALS[1]} --download=$BIDSDIR --download-format=bids
+BIDS_DATASETDIR=$BIDSDIR/*
+echo "Downloaded BIDS data to: $BIDS_DATASETDIR"
 
 # Run MRIQC as a batch job
-#JOB_ID=`sbatch $HOME/code/slurm/mriqc.sh $WORKDIR $PROJ`
-#echo "MRIQC job ID: $JOB_ID"
+MRIQC_OUTDIR=$WORKDIR/mriqc_out
+JOB_ID=`sbatch $HOME/code/slurm/mriqc.sh $BIDS_DATASETDIR $MRIQC_OUTDIR`
+echo "MRIQC job ID: $JOB_ID"
 
 # Run dependent job to do upload
 #sbatch $HOME/code/slurm_scripts/upload.sh $HOST $PROJ $SUB $EXP mriqc $WORKDIR ${CREDENTIALS[0]} ${CREDENTIALS[1]} $JOB_ID
