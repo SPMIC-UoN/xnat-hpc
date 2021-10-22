@@ -1,0 +1,37 @@
+#!/bin/bash
+#
+# XNAT remote command to run FSL_DEFACE on structural
+# scans within a session
+
+HOST=$1
+JSESSIONID=$2
+PROJ=$3
+SUB=$4
+EXP=$5
+ARGS=$6
+
+# Create working directory
+WORKDIR=`mktemp -d -p /gpfs01/home/service_hpc_xnat/tmp $0_XXXXXX`
+
+{
+module load conda-img
+source activate xnat
+
+# Convert session ID into a user alias token for subsequent upload authentication
+CREDENTIALS=`/gpfs01/home/service_hpc_xnat/code/get_user_alias $HOST $JSESSION`
+CREDENTIALS=($CREDENTIALS)
+echo "Obtained user alias token - alias: ${CREDENTIALS[0]}"
+
+# Get session scans into a temp dir in BIDS format as required for mriqc
+xnatc --xnat=$HOST --project=$PROJ --subject=$SUB --experiment=$EXP --user=${CREDENTIALS[0]} --password=${CREDENTIALS[1]} --download=$WORKDIR --download-format=bids
+echo "Downloaded BIDS data to: $WORKDIR"
+
+# Run MRIQC as a batch job
+JOB_ID=`sbatch /gpfs01/home/service_hpc_xnat/code/slurm_scripts/mriqc.sh $WORKDIR`
+echo "MRIQC job ID: $JOB_ID"
+
+# Run dependent job to do upload
+#sbatch /gpfs01/home/service_hpc_xnat/code/slurm_scripts/upload.sh $HOST $PROJ $SUB $EXP mriqc $WORKDIR ${CREDENTIALS[0]} ${CREDENTIALS[1]} $JOB_ID
+
+} >$WORKDIR/out.log 2>$WORKDIR/err.log
+
