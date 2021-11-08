@@ -1,0 +1,9 @@
+# Dockerfile to install UKAT
+FROM python:3.7
+
+RUN apt-get update -y
+RUN pip install ukat
+
+ADD ukat_t2star.py .
+
+
