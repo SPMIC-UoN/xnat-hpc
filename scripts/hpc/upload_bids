@@ -7,15 +7,16 @@ import os
 
 import xnat
 
+print("Upload BIDS: %s" % sys.argv)
 host_url = sys.argv[1]
-jsessionid = sys.argv[2]
-user_alias = sys.argv[3]
-proj=sys.argv[4]
-subj=sys.argv[5]
-exp=sys.argv[6]
-bidsdir=sys.argv[7]
-assessor_type=sys.argv[8]
-assessor_name=sys.argv[9]
+proj=sys.argv[2]
+subj=sys.argv[3]
+exp=sys.argv[4]
+bidsdir=sys.argv[5]
+assessor_type=sys.argv[6]
+assessor_name=sys.argv[7]
+user_alias = sys.argv[8]
+jsessionid = sys.argv[9]
 
 def bids_match(bids_name, xnat_name):
     ret = bids_name.endswith(xnat_name.replace(" ", "").replace("_", "").replace("-", ""))
@@ -36,8 +37,10 @@ def upload(sesdir):
 #        projdir = os.path.join(bidsdir, bidsproj)
 projdir = bidsdir
 for bidssubj in os.listdir(projdir):
-    if bids_match(bidssubj, subj):
-        subjdir = os.path.join(projdir, bidssubj)
+    # FIXME issue with subject name vs internal XNAT subject ID
+    # if bids_match(bidssubj, subj):
+    subjdir = os.path.join(projdir, bidssubj)
+    if os.path.isdir(subjdir) and bidssubj != "logs":
         print("Found subject dir: %s" % subjdir)
         for bidsses in os.listdir(subjdir):
             if bids_match(bidsses, exp):
