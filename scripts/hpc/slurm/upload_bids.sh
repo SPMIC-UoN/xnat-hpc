@@ -10,6 +10,9 @@
 #SBATCH --partition=imgcomputeq
 #SBATCH --qos=img
 
+module load conda-img
+source activate xnat
+
 HOST=$1
 PROJ=$2
 SUB=$3
@@ -18,9 +21,6 @@ NAME=$5
 WORKDIR=$6
 USER=$7
 PASSWORD=$8
-JOBID=$9
-
-#SBATCH --dependency=afterok:$JOBID
 
 $HOME/code/upload_bids $HOST $PROJ $SUB $EXP $WORKDIR TestPipelineData $NAME $USER $PASSWORD
 
