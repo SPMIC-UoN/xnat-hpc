@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 #
 # XNAT remote command to run FSL_DEFACE on structural
 # scans within a session
@@ -34,11 +34,12 @@ echo "Downloaded BIDS data to: $BIDS_DATASETDIR"
 
 # Run MRIQC as a batch job
 MRIQC_OUTDIR=$WORKDIR/mriqc_out
-JOB_ID=`sbatch $HOME/code/slurm/mriqc.sh $BIDS_DATASETDIR $MRIQC_OUTDIR`
+JOB_ID=`sbatch --parsable $HOME/code/slurm/mriqc.sh $BIDS_DATASETDIR $MRIQC_OUTDIR`
 echo "MRIQC job ID: $JOB_ID"
 
 # Run dependent job to do upload
-#sbatch $HOME/code/slurm_scripts/upload.sh $HOST $PROJ $SUB $EXP mriqc $WORKDIR ${CREDENTIALS[0]} ${CREDENTIALS[1]} $JOB_ID
+UPLOAD_JOB_ID=`sbatch --parsable --dependency=afterok:$JOB_ID $HOME/code/slurm/upload_bids.sh $HOST $PROJ $SUB $EXP mriqc $MRIQC_OUTDIR ${CREDENTIALS[0]} ${CREDENTIALS[1]}` 
+echo "MRIQC upload job ID: $UPLOAD_JOB_ID"
 
 } >$WORKDIR/out.log 2>$WORKDIR/err.log
 
