@@ -1,4 +1,4 @@
-def groupName = 'uk.ac.nottingham.physimals'
+def groupName = 'uk.ac.nottingham.spmic'
 def pluginVersion = '0.0.1'
 
 group groupName
