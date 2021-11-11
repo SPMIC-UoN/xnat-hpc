@@ -22,7 +22,7 @@ module load conda-img
 source activate xnat
 
 # Convert session ID into a user alias token for subsequent upload authentication
-CREDENTIALS=`$HOME/code/get_user_alias $HOST $JSESSION`
+CREDENTIALS=`$HOME/code/generic/get_user_alias $HOST $JSESSION`
 CREDENTIALS=($CREDENTIALS)
 echo "Obtained user alias token - alias: ${CREDENTIALS[0]}"
 
@@ -38,7 +38,7 @@ JOB_ID=`sbatch --parsable $HOME/code/slurm/mriqc.sh $BIDS_DATASETDIR $MRIQC_OUTD
 echo "MRIQC job ID: $JOB_ID"
 
 # Run dependent job to do upload
-UPLOAD_JOB_ID=`sbatch --parsable --dependency=afterok:$JOB_ID $HOME/code/slurm/upload_bids.sh $HOST $PROJ $SUB $EXP mriqc $MRIQC_OUTDIR ${CREDENTIALS[0]} ${CREDENTIALS[1]}` 
+UPLOAD_JOB_ID=`sbatch --parsable --dependency=afterok:$JOB_ID $HOME/code/slurm/upload_mriqc.sh $HOST $PROJ $SUB $EXP mriqc $MRIQC_OUTDIR ${CREDENTIALS[0]} ${CREDENTIALS[1]}` 
 echo "MRIQC upload job ID: $UPLOAD_JOB_ID"
 
 } >$WORKDIR/out.log 2>$WORKDIR/err.log
