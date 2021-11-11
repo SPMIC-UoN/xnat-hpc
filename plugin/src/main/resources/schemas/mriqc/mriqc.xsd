@@ -1,0 +1,126 @@
+<xs:schema targetNamespace="http://github.com/spmic-uon/xnat-hpc" 
+    xmlns:xnat_hpc="http://github.com/spmic-uon/xnat-hpc"
+    xmlns:xnat="http://nrg.wustl.edu/xnat" 
+    xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+    elementFormDefault="qualified" 
+    attributeFormDefault="unqualified">
+    <xs:import namespace="http://nrg.wustl.edu/xnat" schemaLocation="../xnat/xnat.xsd"/>
+    <xs:element name="MRIQCData" type="xnat_hpc:MRIQCData"/>
+    <xs:complexType name="MRIQCData">
+        <xs:annotation>
+            <xs:documentation>ImageAssessor which encapsulates the output from running MRIQC</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="xnat:mrAssessorData">
+                    <xs:element name="mriqcVersion" minOccurs="0" maxOccurs="1">
+                        <xs:annotation>
+                            <xs:documentation>Version of the MRIQC used</xs:documentation>
+                        </xs:annotation>
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string"/>
+                        </xs:simpleType>
+                    </xs:element>
+                    <xs:element name="scan" minOccurs="1" maxOccurs="1">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="scan_id" type="xs:string" minOccurs="1" maxOccurs="1"/>
+                                <xs:element name="dummy_trs" type="xs:int" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="fd_num" type="xs:int" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="size_t" type="xs:int" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="size_x" type="xs:int" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="size_y" type="xs:int" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="size_z" type="xs:int" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="aor" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="aqi" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="cjv" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="cnr" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="dvars_nstd" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="dvars_std" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="dvars_vstd" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="efc" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="fber" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="fd_mean" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="fd_perc" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="fwhm_avg" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="fwhm_x" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="fwhm_y" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="fwhm_z" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="gcor" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="gsr_x" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="gsr_y" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="icvs_csf" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="icvs_gm" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="icvs_wm" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="inu_med" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="inu_range" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="qi_1" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="qi_2" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="rpve_csf" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="rpve_gm" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="rpve_wm" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="snr" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="snr_csf" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="snr_gm" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="snr_total" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="snr_wm" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="snrd_csf" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="snrd_gm" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="snrd_total" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="snrd_wm" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="spacing_tr" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="spacing_x" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="spacing_y" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="spacing_z" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_bg_k" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_bg_mad" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_bg_mean" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_bg_median" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_bg_n" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_bg_p05" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_bg_p95" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_bg_stdv" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_csf_k" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_csf_mad" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_csf_mean" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_csf_median" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_csf_n" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_csf_p05" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_csf_p95" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_csf_stdv" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_fg_k" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_fg_mad" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_fg_mean" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_fg_median" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_fg_n" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_fg_p05" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_fg_p95" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_fg_stdv" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_gm_k" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_gm_mad" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_gm_mean" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_gm_median" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_gm_n" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_gm_p05" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_gm_p95" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_gm_stdv" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_wm_k" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_wm_mad" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_wm_mean" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_wm_median" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_wm_n" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_wm_p05" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_wm_p95" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="summary_wm_stdv" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="tpm_overlap_csf" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="tpm_overlap_gm" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="tpm_overlap_wm" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="tsnr" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="wm2max" type="xs:float" minOccurs="0" maxOccurs="1"/>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+</xs:schema>
