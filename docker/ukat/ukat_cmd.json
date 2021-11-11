@@ -47,7 +47,7 @@
             "label": "ukat_t2star", 
             "output-handlers": [
                 {
-                    "accepts-command-output": "ukat-out", 
+                    "accepts-command-output": "t2star", 
                     "label": "T2STAR", 
                     "type": "Resource", 
                     "name": "t2star-resource", 

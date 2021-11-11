@@ -1,0 +1,36 @@
+<xs:schema targetNamespace="http://github.com/spmic-uon/xnat-hpc" 
+    xmlns:xnat_hpc="http://github.com/spmic-uon/xnat-hpc"
+    xmlns:xnat="http://nrg.wustl.edu/xnat" 
+    xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+    elementFormDefault="qualified" 
+    attributeFormDefault="unqualified">
+    <xs:import namespace="http://nrg.wustl.edu/xnat" schemaLocation="../xnat/xnat.xsd"/>
+    <xs:element name="PipelineData" type="xnat_hpc:PipelineData"/>
+    <xs:complexType name="PipelineData">
+        <xs:annotation>
+            <xs:documentation>ImageAssessor which encapsulates the output from running a named pipeline</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="xnat:imageAssessorData">
+                <xs:sequence>
+                    <xs:element name="pipelineName" minOccurs="1" maxOccurs="1">
+                        <xs:annotation>
+                            <xs:documentation>Name of the pipeline run</xs:documentation>
+                        </xs:annotation>
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string"/>
+                        </xs:simpleType>
+                    </xs:element>
+                    <xs:element name="pipelineVersion" minOccurs="0" maxOccurs="1">
+                        <xs:annotation>
+                            <xs:documentation>Version of the pipeline used</xs:documentation>
+                        </xs:annotation>
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string"/>
+                        </xs:simpleType>
+                    </xs:element>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+</xs:schema>
