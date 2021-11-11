@@ -12,6 +12,7 @@
         </xs:annotation>
         <xs:complexContent>
             <xs:extension base="xnat:mrAssessorData">
+                <xs:sequence>
                     <xs:element name="mriqcVersion" minOccurs="0" maxOccurs="1">
                         <xs:annotation>
                             <xs:documentation>Version of the MRIQC used</xs:documentation>
@@ -20,7 +21,7 @@
                             <xs:restriction base="xs:string"/>
                         </xs:simpleType>
                     </xs:element>
-                    <xs:element name="scan" minOccurs="1" maxOccurs="1">
+                    <xs:element name="scan" minOccurs="1" maxOccurs="unbounded">
                         <xs:complexType>
                             <xs:sequence>
                                 <xs:element name="scan_id" type="xs:string" minOccurs="1" maxOccurs="1"/>
