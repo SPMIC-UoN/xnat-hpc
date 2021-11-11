@@ -1,8 +1,8 @@
 #!/bin/bash -x
 #
-# XNAT remote command to run FSL_DEFACE on structural
-# scans within a session
+# XNAT remote command to run MRIQC
 
+# Arguments passed by XNAT pipeline script
 HOST=$1
 JSESSION=$2
 PROJ=$3
@@ -10,10 +10,15 @@ SUB=$4
 EXP=$5
 ARGS=$6
 
-# Create working directory
+# Basic info FIXME tempdir is not ideal
 SCRIPTNAME=`basename "$0"`
-WORKDIR=`mktemp -d -p $HOME/tmp $SCRIPTNAME_XXXXXX`
+CODEDIR=`dirname "$0"`/..
+TEMPDIR=$HOME/tmp
 
+# Create working directory
+WORKDIR=`mktemp -d -p $TEMPDIR $SCRIPTNAME_XXXXXX`
+
+# Braces to send stdout/stderr to logfiles in working dir
 {
 echo $@
 echo "Working directory: $WORKDIR"
@@ -22,7 +27,7 @@ module load conda-img
 source activate xnat
 
 # Convert session ID into a user alias token for subsequent upload authentication
-CREDENTIALS=`$HOME/code/generic/get_user_alias $HOST $JSESSION`
+CREDENTIALS=`$CODEDIR/generic/get_user_alias $HOST $JSESSION`
 CREDENTIALS=($CREDENTIALS)
 echo "Obtained user alias token - alias: ${CREDENTIALS[0]}"
 
@@ -34,11 +39,11 @@ echo "Downloaded BIDS data to: $BIDS_DATASETDIR"
 
 # Run MRIQC as a batch job
 MRIQC_OUTDIR=$WORKDIR/mriqc_out
-JOB_ID=`sbatch --parsable $HOME/code/slurm/mriqc.sh $BIDS_DATASETDIR $MRIQC_OUTDIR`
+JOB_ID=`sbatch --parsable $CODEDIR/slurm/mriqc.sh $BIDS_DATASETDIR $MRIQC_OUTDIR`
 echo "MRIQC job ID: $JOB_ID"
 
 # Run dependent job to do upload
-UPLOAD_JOB_ID=`sbatch --parsable --dependency=afterok:$JOB_ID $HOME/code/slurm/upload_mriqc.sh $HOST $PROJ $SUB $EXP mriqc $MRIQC_OUTDIR ${CREDENTIALS[0]} ${CREDENTIALS[1]}` 
+UPLOAD_JOB_ID=`sbatch --parsable --dependency=afterok:$JOB_ID $CODEDIR/slurm/upload_mriqc.sh $HOST $PROJ $SUB $EXP mriqc $MRIQC_OUTDIR ${CREDENTIALS[0]} ${CREDENTIALS[1]}` 
 echo "MRIQC upload job ID: $UPLOAD_JOB_ID"
 
 } >$WORKDIR/out.log 2>$WORKDIR/err.log
