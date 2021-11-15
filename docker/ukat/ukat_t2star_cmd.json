@@ -1,6 +1,6 @@
 {
     "name": "ukat_t2star", 
-    "command-line": "python ukat_t2star.py /input /output",
+    "command-line": "python ukat_t2star.py /input /output [METHOD]",
     "image": "martincraig/ukat", 
     "label": "ukat_t2star",
     "version": "0.0.1", 
@@ -9,6 +9,14 @@
     "type": "docker", 
     "description": "Runs UKAT T2* mapping",
     "inputs": [
+        {
+            "name": "method",
+            "replacement-key": "[METHOD]",
+            "required": false,
+            "type": "string",
+            "default-value": "loglin",
+            "description": "Method for calculating T2* - loglin or 2p_exp"
+        }
     ], 
     "outputs": [
         {

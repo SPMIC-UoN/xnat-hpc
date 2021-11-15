@@ -2,6 +2,8 @@
 Simple wrapper script for UKAT T2star mapping code
 
 Intended for use in Docker container for XNAT
+
+Usage: ukat_t2star.py <indir> <outdir> <method>
 """
 import os
 import sys
@@ -15,6 +17,7 @@ from ukat.mapping.t2star import T2Star
 
 indir = sys.argv[1]
 outdir = sys.argv[2]
+method = sys.argv[3]
 
 # Load input data
 print("Loading from %s" % indir)
@@ -55,7 +58,7 @@ if data:
     tes = [d[0] for d in data]
     print(imgs.shape)
     print(tes)
-    mapper_loglin = T2Star(imgs, tes, affine=affine, method='loglin')
+    mapper_loglin = T2Star(imgs, tes, affine=affine, method=method)
     # Extract the T2* map from the object
     t2star_loglin = mapper_loglin.t2star_map
 
