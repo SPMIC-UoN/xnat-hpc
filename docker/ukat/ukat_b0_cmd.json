@@ -1,29 +1,21 @@
 {
-    "name": "ukat_t2star", 
-    "command-line": "python ukat_t2star.py /input /output [METHOD]",
+    "name": "ukat_b0", 
+    "command-line": "python ukat_b0.py /input /output [METHOD]",
     "image": "martincraig/ukat", 
-    "label": "ukat_t2star",
+    "label": "ukat_b0",
     "version": "0.0.1", 
     "schema-version": "1.0", 
     "info-url": "", 
     "type": "docker", 
-    "description": "Runs UKAT T2* mapping",
+    "description": "Runs UKAT B0 mapping",
     "inputs": [
-        {
-            "name": "method", 
-            "replacement-key": "[METHOD]",
-            "required": false, 
-            "type": "string", 
-            "default-value": "loglin",
-            "description": "Method for calculating T2* - loglin or 2p_exp"
-        }
     ], 
     "outputs": [
         {
             "mount": "ukat-out", 
             "required": "true", 
-            "name": "t2star", 
-            "description": "T2* map"
+            "name": "b0", 
+            "description": "B0 maps"
         }
     ],
     "mounts": [
@@ -51,14 +43,14 @@
                 }
             ], 
             "contexts": ["xnat:imageScanData"], 
-            "description": "Run UKAT T2* mapping", 
-            "label": "ukat_t2star", 
+            "description": "Run UKAT B0 mapping", 
+            "label": "ukat_b0", 
             "output-handlers": [
                 {
-                    "accepts-command-output": "t2star", 
-                    "label": "T2STAR", 
+                    "accepts-command-output": "b0", 
+                    "label": "B0", 
                     "type": "Resource", 
-                    "name": "t2star-resource", 
+                    "name": "b0-resource", 
                     "as-a-child-of-wrapper-input": "scan"
                 }
             ], 
@@ -71,7 +63,7 @@
                     "description": "Input scan"
                 }
             ], 
-            "name": "ukat_t2star-scan"
+            "name": "ukat_b0-scan"
         }
     ]
 }
