@@ -23,6 +23,19 @@ print("Loading from %s" % indir)
 data = []
 affine = None
 fprefix = None
+phase_info_in_fname = False
+
+# First we need to figure out if dcm2niix has embedded phase/mag info in the
+# file name as it sometimes needs to do this
+for fname in os.listdir(indir):
+    if fname.endswith(".nii") or fname.endswith(".nii.gz"):
+        base_fname = fname[:fname.index(".")]
+        if base_fname.endswith("_ph"):
+            phase_info_in_fname = True
+
+if phase_info_in_fname:
+    print("INFO: Phase information is embedded in filename")
+
 for fname in os.listdir(indir):
     if fname.endswith(".nii") or fname.endswith(".nii.gz"):
         base_fname = fname[:fname.index(".")]
@@ -37,8 +50,10 @@ for fname in os.listdir(indir):
                 print("WARNING: Image %s is 4D - ignoring" % fname)
             elif te is None:
                 print("WARNING: Image %s has no EchoTime defined in metadata - ignoring" % fname)
-            elif "PHASE" not in metadata.get("ImageType", []):
-                print("INFO: Image %s is magnitude - ignoring" % fname)
+            elif not phase_info_in_fname and "PHASE" not in metadata.get("ImageType", []):
+                print("INFO: Image %s is not phase  - ignoring" % fname)
+            elif phase_info_in_fname and not base_fname.endswith("_ph"):
+                print("INFO: Image %s is not phase - ignoring" % fname)
             else:
                 print("Processing %s" % fname)
                 data.append((te*1000, image))
@@ -52,11 +67,11 @@ for fname in os.listdir(indir):
             print("WARNING: Found Nifti file %s without corresponding JSON - ignoring" % fname)
 
 if data:
-    data = sorted(data)
+    data = sorted(data, key=lambda x: x[0])
     imgs = np.stack([d[1] for d in data], axis=-1)
     tes = [d[0] for d in data]
-    print(imgs.shape)
-    print(tes)
+    print("INFO: %i images found" % len(data))
+    print("INFO: TEs: %s" % tes)
     mapper = B0(imgs, tes, affine=affine)
 
     # Extract the maps and save to Nifti
