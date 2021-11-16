@@ -15,6 +15,18 @@ import json
 from ukat.data import fetch
 from ukat.mapping.t2star import T2Star
 
+def is_mag_fname(fname):
+    if "_" not in fname:
+        return True
+    ftype = fname[fname.rindex("_")+1:]
+    try:
+        seriesnum = int(ftype)
+        return True
+    except ValueError:
+        # File has disambiguation string, so is phase
+        # or real/imag part
+        return False
+
 indir = sys.argv[1]
 outdir = sys.argv[2]
 method = sys.argv[3]
@@ -24,6 +36,19 @@ print("Loading from %s" % indir)
 data = []
 affine = None
 fprefix = None
+phase_info_in_fname = False
+
+# First we need to figure out if dcm2niix has embedded phase/mag info in the
+# file name as it sometimes needs to do this
+for fname in os.listdir(indir):
+    if fname.endswith(".nii") or fname.endswith(".nii.gz"):
+        base_fname = fname[:fname.index(".")]
+        if base_fname.endswith("_ph"):
+            phase_info_in_fname = True
+
+if phase_info_in_fname:
+    print("INFO: Phase information is embedded in filename")
+
 for fname in os.listdir(indir):
     if fname.endswith(".nii") or fname.endswith(".nii.gz"):
         base_fname = fname[:fname.index(".")]
@@ -38,8 +63,10 @@ for fname in os.listdir(indir):
                 print("WARNING: Image %s is 4D - ignoring" % fname)
             elif te is None:
                 print("WARNING: Image %s has no EchoTime defined in metadata - ignoring" % fname)
-            elif "PHASE" in metadata.get("ImageType", []):
-                print("INFO: Image %s is phase - ignoring" % fname)
+            elif not phase_info_in_fname and "PHASE" in metadata.get("ImageType", []):
+                print("INFO: Image %s is not magnitude - ignoring" % fname)
+            elif phase_info_in_fname and not is_mag_fname(base_fname):
+                print("INFO: Image %s is not magnitude - ignoring" % fname)
             else:
                 print("Processing %s" % fname)
                 data.append((te*1000, image))
@@ -56,8 +83,8 @@ if data:
     data = sorted(data)
     imgs = np.stack([d[1] for d in data], axis=-1)
     tes = [d[0] for d in data]
-    print(imgs.shape)
-    print(tes)
+    print("INFO: %i images found" % len(data))
+    print("INFO: TEs: %s" % tes)
     mapper_loglin = T2Star(imgs, tes, affine=affine, method=method)
     # Extract the T2* map from the object
     t2star_loglin = mapper_loglin.t2star_map
