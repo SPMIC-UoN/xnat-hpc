@@ -39,11 +39,11 @@ echo "Downloaded BIDS data to: $BIDS_DATASETDIR"
 
 # Run MRIQC as a batch job
 MRIQC_OUTDIR=$WORKDIR/mriqc_out
-JOB_ID=`sbatch --parsable $CODEDIR/slurm/mriqc.sh $BIDS_DATASETDIR $MRIQC_OUTDIR`
+JOB_ID=`sbatch --parsable $CODEDIR/mriqc/mriqc.slurm $BIDS_DATASETDIR $MRIQC_OUTDIR`
 echo "MRIQC job ID: $JOB_ID"
 
 # Run dependent job to do upload
-UPLOAD_JOB_ID=`sbatch --parsable --dependency=afterok:$JOB_ID $CODEDIR/slurm/upload_mriqc.sh $HOST $PROJ $SUB $EXP MRIQC $MRIQC_OUTDIR ${CREDENTIALS[0]} ${CREDENTIALS[1]}` 
+UPLOAD_JOB_ID=`sbatch --parsable --dependency=afterok:$JOB_ID $CODEDIR/mriqc/upload.slurm $HOST $PROJ $SUB $EXP MRIQC $MRIQC_OUTDIR ${CREDENTIALS[0]} ${CREDENTIALS[1]}`
 echo "MRIQC upload job ID: $UPLOAD_JOB_ID"
 
 } >$WORKDIR/out.log 2>$WORKDIR/err.log
