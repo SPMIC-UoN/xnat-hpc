@@ -13,7 +13,7 @@ XNAT_HOME=/home/xnat
 XNAT_SSH_KEY=$XNAT_HOME/.ssh/id_rsa_hpc
 XNAT_HPC_USER=service_hpc_xnat
 HPC_LOGIN_NODE=login001.augusta.nottingham.ac.uk
-HPC_COMMAND_DIR=code/xnat_commands
+HPC_COMMAND_DIR=code
 
 echo "run_hpc_ssh.sh"
 echo $@
@@ -26,6 +26,6 @@ EXP=$5
 CMD=$6
 ARGS=$7
 ssh -t -i ${XNAT_SSH_KEY} ${XNAT_HPC_USER}@${HPC_LOGIN_NODE} << EOF
-${HPC_COMMAND_DIR}/$CMD $HOST $JSESSION $PROJ $SUBJ $EXP $ARGS
+${HPC_COMMAND_DIR}/$CMD/run.sh $HOST $JSESSION $PROJ $SUBJ $EXP $ARGS
 EOF
 
