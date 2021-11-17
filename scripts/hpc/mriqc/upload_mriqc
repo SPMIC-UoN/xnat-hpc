@@ -1,9 +1,10 @@
 #!/gpfs01/software/imaging/miniconda3/envs/xnat/bin/python
 """
-Script to upload data from a BIDS compliant output to a known project/subject/session
+Script to upload data from a BIDS compliant MRIQC output to a known project/subject/session
 """
 import sys
 import os 
+import tempfile
 
 import xnat
 import json
@@ -22,10 +23,9 @@ proj=sys.argv[2]
 subj=sys.argv[3]
 exp=sys.argv[4]
 bidsdir=sys.argv[5]
-assessor_type=sys.argv[6]
-assessor_name=sys.argv[7]
-user_alias = sys.argv[8]
-jsessionid = sys.argv[9]
+assessor_name=sys.argv[6]
+user_alias = sys.argv[7]
+jsessionid = sys.argv[8]
 
 def bids_match(bids_name, xnat_name):
     ret = bids_name.endswith(xnat_name.replace(" ", "").replace("_", "").replace("-", ""))
@@ -42,6 +42,7 @@ def create_scanxml(fname, md):
     return xml
 
 def upload(sesdir):
+    json_files = []
     xml = XML_HEADER % (assessor_name, "unknown")
     for subdir in os.listdir(sesdir):
         print("Uploading files in %s" % subdir)
@@ -49,23 +50,30 @@ def upload(sesdir):
         for fname in os.listdir(filedir):
             print("Uploading: %s" % fname)
             fpath = os.path.join(filedir, fname)
+            json_files.append(fpath)
             with open(fpath) as f:
                 md = json.load(f)
                 xml += create_scanxml(fname, md)
     xml += XML_FOOTER
-    with open("mriqc.xml", "w") as f:
+
+    # Create the MRIQC resource with QC data as key/value fields
+    with tempfile.NamedTemporaryFile() as f:
         f.write(xml)
-    print(xml)
-    os.system('curl -u %s:%s -X POST "%s/data/projects/%s/subjects/%s/experiments/%s/assessors" -F "file=@mriqc.xml"' % (user_alias, jsessionid, host_url, proj, subj, exp))
-#            os.system("xnatc --user=%s --password=%s --xnat=%s --project=%s --subject=%s --experiment=%s --upload=%s --upload-name=%s --assessor-type=%s --assessor=%s --upload-type=%s" % (user_alias, jsessionid, host_url, proj, subj, exp, fpath, fname, assessor_type, assessor_name, subdir))
+        #print(xml)
+        os.system("xnatc --user=%s --password=%s --xnat=%s --project=%s --subject=%s --experiment=%s --create-assessor=%s" % (user_alias, jsessionid, host_url, proj, subj, exp, f.name))
+
+    # Also upload each individual json file as a resource
+    for fpath in json_files:
+        os.system("xnatc --user=%s --password=%s --xnat=%s --project=%s --subject=%s --experiment=%s --assessor=%s --upload=%s ---upload-resource=JSON" % (user_alias, jsessionid, host_url, proj, subj, exp, assessor_name, fpath))
+
 # FIXME no project toplevel dir at present
 #for bidsproj in os.listdir(bidsdir):
 #    if bids_match(proj, bidsproj):
 #        projdir = os.path.join(bidsdir, bidsproj)
 projdir = bidsdir
 for bidssubj in os.listdir(projdir):
-# FIXME issue with subject name vs internal XNAT subject ID
-#    if bids_match(bidssubj, subj):
+    # FIXME issue with subject name vs internal XNAT subject ID
+    #    if bids_match(bidssubj, subj):
     print("Checking %s" % bidssubj)
     subjdir = os.path.join(projdir, bidssubj)
     if os.path.isdir(subjdir) and bidssubj != "logs":
@@ -76,4 +84,3 @@ for bidssubj in os.listdir(projdir):
                 print("Found session dir: %s" % sesdir)
                 print("Uploading contents of %s" % sesdir)
                 upload(sesdir)
-

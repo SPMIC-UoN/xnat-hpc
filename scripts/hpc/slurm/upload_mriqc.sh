@@ -22,5 +22,5 @@ WORKDIR=$6
 USER=$7
 PASSWORD=$8
 
-$HOME/code/mriqc/upload_mriqc $HOST $PROJ $SUB $EXP $WORKDIR TestPipelineData $NAME $USER $PASSWORD
+$HOME/code/mriqc/upload_mriqc $HOST $PROJ $SUB $EXP $WORKDIR $NAME $USER $PASSWORD
 
