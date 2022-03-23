@@ -9,7 +9,7 @@ import tempfile
 import xnat
 import json
 
-XML_HEADER = """
+XML_HEADER = """<?xml version="1.0" encoding="UTF-8"?>
 <MRIQCData xmlns="http://github.com/spmic-uon/xnat-hpc" xmlns:xnat="http://nrg.wustl.edu/xnat" xsi:schemaLocation="http://github.com/spmic-uon/xnat-hpc schema.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <xnat:label>%s</xnat:label>
   <mriqcVersion>%s</mriqcVersion>"""
@@ -57,14 +57,21 @@ def upload(sesdir):
     xml += XML_FOOTER
 
     # Create the MRIQC resource with QC data as key/value fields
-    with tempfile.NamedTemporaryFile() as f:
-        f.write(xml)
-        #print(xml)
+    f = None
+    try:
+        f = tempfile.NamedTemporaryFile(suffix=".xml", delete=False)
+        f.write(xml.encode("utf-8"))
+        f.close()
+        print(xml)
+        print("xnatc --user=%s --password=%s --xnat=%s --project=%s --subject=%s --experiment=%s --create-assessor=%s" % (user_alias, jsessionid, host_url, proj, subj, exp, f.name))
         os.system("xnatc --user=%s --password=%s --xnat=%s --project=%s --subject=%s --experiment=%s --create-assessor=%s" % (user_alias, jsessionid, host_url, proj, subj, exp, f.name))
+    finally:
+        if f: os.unlink(f.name)
 
     # Also upload each individual json file as a resource
     for fpath in json_files:
-        os.system("xnatc --user=%s --password=%s --xnat=%s --project=%s --subject=%s --experiment=%s --assessor=%s --upload=%s ---upload-resource=JSON" % (user_alias, jsessionid, host_url, proj, subj, exp, assessor_name, fpath))
+        print("xnatc --user=%s --password=%s --xnat=%s --project=%s --subject=%s --experiment=%s --assessor=%s --upload=%s --upload-resource=JSON" % (user_alias, jsessionid, host_url, proj, subj, exp, assessor_name, fpath))
+        os.system("xnatc --user=%s --password=%s --xnat=%s --project=%s --subject=%s --experiment=%s --assessor=%s --upload=%s --upload-resource=JSON" % (user_alias, jsessionid, host_url, proj, subj, exp, assessor_name, fpath))
 
 # FIXME no project toplevel dir at present
 #for bidsproj in os.listdir(bidsdir):
