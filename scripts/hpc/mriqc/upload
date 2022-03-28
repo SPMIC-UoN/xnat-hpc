@@ -35,9 +35,32 @@ def bids_match(bids_name, xnat_name):
 def create_scanxml(fname, md):
     xml = "  <scan>\n"
     xml += "    <scan_id>%s</scan_id>\n" % fname[:fname.index(".")]
-    for key in md:
-        if key not in ("bids_meta", "provenance"):
-            xml +="    <%s>%s</%s>\n" % (key, md[key], key)
+    xml += "    <scan_type>%s</scan_type>\n" % md.get("bids_meta", {}).get("SeriesDescription", "(unknown)")
+    for key in [k for k in md if k not in ("bids_meta", "provenance")]:
+        group, tissue, test = "", "", key
+        if test.startswith("summary_"):
+            test = test.replace("summary_", "")
+            group = "summary"
+        
+        parts = list(test.split("_"))
+        tissue = ""
+        for t in ("gm", "wm", "csf", "total"):
+            if t in parts:
+                tissue = t
+                parts.remove(t)
+                break
+
+        if tissue:
+            group = "tissue"
+        else:
+            group = "general"
+
+        test = "_".join(parts)
+
+        xml +="    <group>%s</group>\n" % group
+        xml +="    <tissue>%s</tissue>\n" % tissue
+        xml +="    <test>%s</test>\n" % test
+        xml +="    <result>%s</result>\n" % md[key]
     xml += "  </scan>\n"
     return xml
 
