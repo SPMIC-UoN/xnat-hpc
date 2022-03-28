@@ -57,10 +57,12 @@ def create_scanxml(fname, md):
 
         test = "_".join(parts)
 
-        xml +="    <group>%s</group>\n" % group
-        xml +="    <tissue>%s</tissue>\n" % tissue
-        xml +="    <test>%s</test>\n" % test
-        xml +="    <result>%s</result>\n" % md[key]
+        xml +="    <test>\n"
+        xml +="      <group>%s</group>\n" % group
+        xml +="      <tissue>%s</tissue>\n" % tissue
+        xml +="      <name>%s</name>\n" % test
+        xml +="      <result>%.4g</result>\n" % md[key]
+        xml +="    </test>\n"
     xml += "  </scan>\n"
     return xml
 
