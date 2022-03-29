@@ -1,113 +1,110 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- -->
+<!-- XNAT pipeline to run code on the HPC -->
 <Pipeline xmlns="http://nrg.wustl.edu/pipeline" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://nrg.wustl.edu/pipeline ..\schema\pipeline.xsd"  xmlns:fileUtils="http://www.xnat.org/java/org.nrg.imagingtools.utils.FileUtils">
-	<!--Should be name of the pipeline XML file -->
-	<name>run_hpc</name>
-	<!-- Filesystem path to the pipeline XML -->
-	<location>msc</location>
-	<description>Run command on HPC</description>
-	<resourceRequirements>
-		<!--<property name="DRMAA_JobTemplate_JobCategory">XNAT</property>-->
-		<property name="DRMAA_JobTemplate_JobResource">-q XNAT</property>
-	</resourceRequirements>
-	<documentation>
-		<authors>
-			<author>
-				<lastname>Craig</lastname>
-				<firstname>Martin</firstname>
-				<contact>
-					<email>martin.craig@nottingham.ac.uk</email>
-				</contact>
-			</author>
-		</authors>
-		<version>0.0.1</version>
-		<input-parameters>
-			<parameter>
-                                <name>sessionID</name>
-                                <values>
-                                        <schemalink>xnat:imageSessionData/ID</schemalink>
-                                </values>
-                                <description>The XNAT unique ID (Accession Number) of the session</description>
-                        </parameter>
-                        <parameter>
-                                <name>sessionName</name>
-                                <values>
-                                        <schemalink>xnat:imageSessionData/label</schemalink>
-                                </values>
-                                <description>The session label or name</description>
-                        </parameter>
-                        <parameter>
-                                <name>projectID</name>
-                                <values>
-                                        <schemalink>xnat:imageSessionData/project</schemalink>
-                                </values>
-                                <description>Project identifier</description>
-                        </parameter>
-                        <parameter>
-                                <name>subjectID</name>
-                                <values>
-                                        <schemalink>xnat:imageSessionData/subject_ID</schemalink>
-                                </values>
-                                <description>Subject identifier</description>
-                        </parameter>
-			<parameter>
-				<name>command</name>
-				<values>
-					<csv>test</csv>
-				</values>
-				<description>Name of command to run</description>
-			</parameter>
-			<parameter>
-				<name>args</name>
-				<values>
-					<csv></csv>
-				</values>
-				<description>Optional arguments to command</description>
-			</parameter>
-		</input-parameters>
-	</documentation>
-	<outputFileNamePrefix>^concat(/Pipeline/parameters/parameter[name='workdir']/values/unique/text(),'/',/Pipeline/name/text())^</outputFileNamePrefix>
-	<!-- Info:: Description of the Pipeline -->
-	<parameters>
-		<parameter>
-			<name>workdir</name>
-			<values>
-				<unique>^concat(/Pipeline/parameters/parameter[name='builddir']/values/unique/text(),'/',/Pipeline/parameters/parameter[name='sessionName']/values/unique/text())^</unique>
-			</values>
-		</parameter>
-		<parameter>
-			<name>JSESSION</name>
-			<values>
-				<unique>^fileUtils:getJSESSION('DUMMY')^</unique>
-			</values>
-			<description>session token</description>
-		</parameter>
-	</parameters>
-	<steps>
-		<step id="1" description="Run remote command on HPC" workdirectory="^/Pipeline/parameters/parameter[name='workdir']/values/unique/text()^">
-                        <resource name="run_hpc_ssh" location="msc/resources">
-                                <argument id="host">
-                                        <value>^concat('"',/Pipeline/parameters/parameter[name='host']/values/unique/text(),'"')^</value>
-                                </argument>
-                                <argument id="jsession">
-                                        <value>^concat('"',/Pipeline/parameters/parameter[name='JSESSION']/values/unique/text(),'"')^</value>
-                                </argument>
-                                <argument id="project">
-                                        <value>^concat('"',/Pipeline/parameters/parameter[name='projectID']/values/unique/text(),'"')^</value>
-                                </argument>
-                                <argument id="subject">
-                                        <value>^concat('"',/Pipeline/parameters/parameter[name='subjectID']/values/unique/text(),'"')^</value>
-                                </argument>
-                                <argument id="session">
-                                        <value>^concat('"',/Pipeline/parameters/parameter[name='sessionName']/values/unique/text(),'"')^</value>
-                                </argument>
-                                <argument id="command">
-                                        <value>^concat('"',/Pipeline/parameters/parameter[name='command']/values/unique/text(),'"')^</value>
-                                </argument>
-                                <argument id="args">
-                                        <value>^concat('"',/Pipeline/parameters/parameter[name='args']/values/unique/text(),'"')^</value>
-                                </argument>
-                        </resource>
-		</step>
-	</steps>
+    <name>run_hpc</name>
+    <!-- Filesystem path to the pipeline XML -->
+    <location>msc</location>
+    <description>Run command on HPC</description>
+    <resourceRequirements>
+        <property name="DRMAA_JobTemplate_JobResource">-q XNAT</property>
+    </resourceRequirements>
+    <documentation>
+        <authors>
+            <author>
+                <lastname>Craig</lastname>
+                <firstname>Martin</firstname>
+                <contact>
+                    <email>martin.craig@nottingham.ac.uk</email>
+                </contact>
+            </author>
+        </authors>
+        <version>0.0.1</version>
+        <input-parameters>
+            <parameter>
+                <name>sessionID</name>
+                <values>
+                    <schemalink>xnat:imageSessionData/ID</schemalink>
+                </values>
+                <description>The XNAT unique ID (Accession Number) of the session</description>
+            </parameter>
+            <parameter>
+                <name>sessionName</name>
+                <values>
+                    <schemalink>xnat:imageSessionData/label</schemalink>
+                </values>
+                <description>The session label or name</description>
+            </parameter>
+            <parameter>
+                <name>projectID</name>
+                <values>
+                    <schemalink>xnat:imageSessionData/project</schemalink>
+                </values>
+                <description>Project identifier</description>
+            </parameter>
+            <parameter>
+                <name>subjectID</name>
+                <values>
+                    <schemalink>xnat:imageSessionData/subject_ID</schemalink>
+                </values>
+                <description>Subject identifier</description>
+            </parameter>
+            <parameter>
+                <name>command</name>
+                <values>
+                    <csv>test</csv>
+                </values>
+                <description>Name of command to run</description>
+            </parameter>
+            <parameter>
+                <name>args</name>
+                <values>
+                    <csv></csv>
+                </values>
+                <description>Optional arguments to command</description>
+            </parameter>
+        </input-parameters>
+    </documentation>
+    <outputFileNamePrefix>^concat(/Pipeline/parameters/parameter[name='workdir']/values/unique/text(),'/',/Pipeline/name/text())^</outputFileNamePrefix>
+    <parameters>
+        <parameter>
+            <name>workdir</name>
+            <values>
+                <unique>^concat(/Pipeline/parameters/parameter[name='builddir']/values/unique/text(),'/',/Pipeline/parameters/parameter[name='sessionName']/values/unique/text())^</unique>
+            </values>
+        </parameter>
+        <parameter>
+            <name>JSESSION</name>
+            <values>
+                <unique>^fileUtils:getJSESSION('DUMMY')^</unique>
+            </values>
+            <description>session token</description>
+        </parameter>
+    </parameters>
+    <steps>
+        <step id="1" description="Run remote command on HPC" workdirectory="^/Pipeline/parameters/parameter[name='workdir']/values/unique/text()^">
+            <resource name="run_hpc_ssh" location="msc/resources">
+                <argument id="host">
+                    <value>^concat('"',/Pipeline/parameters/parameter[name='host']/values/unique/text(),'"')^</value>
+                </argument>
+                <argument id="jsession">
+                    <value>^concat('"',/Pipeline/parameters/parameter[name='JSESSION']/values/unique/text(),'"')^</value>
+                </argument>
+                <argument id="project">
+                    <value>^concat('"',/Pipeline/parameters/parameter[name='projectID']/values/unique/text(),'"')^</value>
+                </argument>
+                <argument id="subject">
+                    <value>^concat('"',/Pipeline/parameters/parameter[name='subjectID']/values/unique/text(),'"')^</value>
+                </argument>
+                <argument id="session">
+                    <value>^concat('"',/Pipeline/parameters/parameter[name='sessionName']/values/unique/text(),'"')^</value>
+                </argument>
+                <argument id="command">
+                    <value>^concat('"',/Pipeline/parameters/parameter[name='command']/values/unique/text(),'"')^</value>
+                </argument>
+                <argument id="args">
+                    <value>^concat('"',/Pipeline/parameters/parameter[name='args']/values/unique/text(),'"')^</value>
+                </argument>
+            </resource>
+        </step>
+    </steps>
 </Pipeline>
