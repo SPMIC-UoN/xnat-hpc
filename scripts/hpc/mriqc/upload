@@ -5,9 +5,12 @@ Script to upload data from a BIDS compliant MRIQC output to a known project/subj
 import sys
 import os 
 import tempfile
+import datetime
 
 import xnat
 import json
+
+__version__ = "0.0.1"
 
 XML_HEADER = """<?xml version="1.0" encoding="UTF-8"?>
 <MRIQCData xmlns="http://github.com/spmic-uon/xnat-hpc" xmlns:xnat="http://nrg.wustl.edu/xnat" xsi:schemaLocation="http://github.com/spmic-uon/xnat-hpc schema.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -16,6 +19,56 @@ XML_HEADER = """<?xml version="1.0" encoding="UTF-8"?>
 
 XML_FOOTER = """
 </MRIQCData>"""
+
+TEST_NAMES = {
+    "n" : "Number of voxels",
+    "k" : "Kurtosis of the distribution",
+    "mad" : "Mean absolute deviation of the distribution",
+    "mean" : "Mean of the distribution",
+    "median" : "Median of the distribution",
+    "p05" : "5th percentile of the distribution",
+    "p95" : "95th percentile of the distribution",
+    "stdv" : "Standard deviation of the distribution",
+    "cjv" : "Coefficient of joint variation. Higher values are related to the presence of heavy head motion and large INU artifacts. Lower values are better.",
+    "cnr" : "Contrast-to-noise ratio. Extension of the SNR calculation to evaluate how separated the tissue distributions of GM and WM are. Higher values indicate better quality.",
+    "efc" : "EFC [Atkinson1997] uses the Shannon entropy of voxel intensities as an indication of ghosting and blurring induced by head motion. Lower values are better",
+    "fber" : "FBER [Shehzad2015], defined as the mean energy of image values within the head relative to outside the head [QAP-measures]. Higher values are better.",
+    "fwhm_avg" : "The FWHM of the spatial distribution of the image intensity values in units of voxels [Forman1995]. Lower values are better.",
+    "fwhm_x" : "The FWHM of the spatial distribution of the image intensity values in units of voxels [Forman1995]. Lower values are better.",
+    "fwhm_y" : "The FWHM of the spatial distribution of the image intensity values in units of voxels [Forman1995]. Lower values are better.",
+    "fwhm_z" : "The FWHM of the spatial distribution of the image intensity values in units of voxels [Forman1995]. Lower values are better.",
+    "inu_med" : "Median of the INU field as extracted by the N4ITK algorithm [Tustison2010]. Values closer to 1.0 are better.",
+    "inu_range" : "Range of the INU field as extracted by the N4ITK algorithm [Tustison2010]. Values closer to 1.0 are better.",
+    "qi_1" : "Detect artifacts in the image using the method described in [Mortamet2009]. Lower values are better.",
+    "qi_2" : "Calculates QI2, based on the goodness-of-fit of a centered X^2 distribution",
+    "size_x" : "Number of voxels in X dimension",
+    "size_y" : "Number of voxels in Y dimension",
+    "size_z" : "Number of voxels in Z dimension",
+    "spacing_x" : "Voxel spacing (mm) in X dimension",
+    "spacing_y" : "Voxel spacing (mm) in Y dimension",
+    "spacing_z" : "Voxel spacing (mm) in Z dimension",
+    "wm2max" : "The white-matter to maximum intensity ratio. Values should be around the interval [0.6, 0.8].",
+    "icvs" : "ICV fractions",
+    "rpve" : "rPVe of tissue Lower values are better.",
+    "snr" : "Signal-to-noise ratio calculated within the tissue mask.",
+    "snrd" : "Dietrich's SNR (SNRd) as proposed by [Dietrich2007], using the air background as reference.",
+    "tpm_overlap" : "The overlap of the TPMs estimated from the image and the corresponding maps from the ICBM nonlinear-asymmetric 2009c template.",
+    "aor" : "AFNI's outlier ratio (aor) - Mean fraction of outliers per fMRI volume as given by AFNI's 3dToutcount.",
+    "aqi" : "Mean quality index as computed by AFNI's 3dTqual.",
+    "dummy_trs" : "Number of *dummy* scans (dummy) - A number of volumes in the begining of the fMRI timeseries identified as non-steady state.",
+    "dvars_nstd" : "Indexes the rate of change of BOLD signal across the entire brain at each frame of data.",
+    "dvars_std" : "DVARS_NSTD but normalized with the standard deviation of the temporal difference time series",
+    "dvars_vstd" : "Voxel-wise standardization of DVARS_STD, where the temporal difference time series is normalized across time by that voxel standard deviation across time, before computing the RMS of the temporal difference",
+    "fd_mean" : "Mean Framewise Displacement: expresses instantaneous head-motion.",
+    "fd_num " : "Number of timepoints above FD threshold",
+    "fd_perc" : "Percent of FDs above the FD threshold",
+    "gcor" : "Global Correlation (gcor) calculates an optimized summary of time-series correlation",
+    "gsr_x" : "Ghost to Signal Ratio along the X axis",
+    "gsr_y" : "Ghost to Signal Ratio along the Y axis",
+    "size_t" : "Number of time points",
+    "spacing_tr" : "Time spacing",
+    "tsnr" : "Temporal SNR (tSNR, tsnr) is a simplified interpretation of the tSNR definition [Kruger2001].",
+}
 
 print("Upload MRIQC: %s" % sys.argv)
 host_url = sys.argv[1]
@@ -32,43 +85,48 @@ def bids_match(bids_name, xnat_name):
     print("Match? %s : %s -> %s" % (bids_name, xnat_name, ret))
     return ret
 
+def is_int(num):
+    return num == float(int(num))
+
 def create_scanxml(fname, md):
     xml = "  <scan>\n"
     xml += "    <scan_id>%s</scan_id>\n" % fname[:fname.index(".")]
     xml += "    <scan_type>%s</scan_type>\n" % md.get("bids_meta", {}).get("SeriesDescription", "(unknown)")
     for key in [k for k in md if k not in ("bids_meta", "provenance")]:
-        group, tissue, test = "", "", key
+        tissue, test = "", key
         if test.startswith("summary_"):
             test = test.replace("summary_", "")
-            group = "summary"
         
         parts = list(test.split("_"))
         tissue = ""
-        for t in ("gm", "wm", "csf", "total"):
+        for t in ("fg", "gm", "wm", "csf", "bg", "total"):
             if t in parts:
                 tissue = t
                 parts.remove(t)
                 break
 
-        if tissue:
-            group = "tissue"
-        else:
-            group = "general"
+        if not tissue:
+            tissue = "general"
 
         test = "_".join(parts)
+        test_name = TEST_NAMES.get(test, test)
 
         xml +="    <test>\n"
-        xml +="      <group>%s</group>\n" % group
-        xml +="      <tissue>%s</tissue>\n" % tissue
-        xml +="      <name>%s</name>\n" % test
-        xml +="      <result>%.4g</result>\n" % md[key]
+        xml +="      <category>%s</category>\n" % tissue.upper()
+        xml +="      <id>%s</id>\n" % key.upper()
+        xml +="      <name>%s</name>\n" % test_name
+        if is_int(md[key]):
+            xml +="      <result>%i</result>\n" % int(md[key])
+        else:
+            xml +="      <result>%.4g</result>\n" % md[key]
         xml +="    </test>\n"
     xml += "  </scan>\n"
     return xml
 
 def upload(sesdir):
     json_files = []
-    xml = XML_HEADER % (assessor_name, "unknown")
+    xml = XML_HEADER % (assessor_name, __version__)
+    xml += "  <xnat:date>%s</xnat:date>\n" % datetime.datetime.today().strftime('%Y-%m-%d')
     for subdir in os.listdir(sesdir):
         print("Uploading files in %s" % subdir)
         filedir = os.path.join(sesdir, subdir)
