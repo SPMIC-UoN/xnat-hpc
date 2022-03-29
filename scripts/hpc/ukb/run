@@ -1,0 +1,48 @@
+#!/bin/bash -x
+#
+# XNAT remote command to run UKB pipeline
+
+# Arguments passed by XNAT pipeline script
+HOST=$1
+JSESSION=$2
+PROJ=$3
+SUB=$4
+EXP=$5
+ARGS=$6
+
+# Basic info FIXME tempdir is not ideal
+SCRIPTNAME=`basename "$0"`
+CODEDIR=`dirname "$0"`/..
+TEMPDIR=$HOME/tmp
+
+# Create working directory
+WORKDIR=`mktemp -d -p $TEMPDIR $SCRIPTNAME_XXXXXX`
+
+# Braces to send stdout/stderr to logfiles in working dir
+{
+echo $@
+echo "Working directory: $WORKDIR"
+
+module load conda-img
+source activate xnat
+
+# Convert session ID into a user alias token for subsequent upload authentication
+CREDENTIALS=`$CODEDIR/generic/get_user_alias $HOST $JSESSION`
+CREDENTIALS=($CREDENTIALS)
+echo "Obtained user alias token - alias: ${CREDENTIALS[0]}"
+
+# Get session scans into a temp dir in BIDS format as required for mriqc
+DICOMDIR=$WORKDIR/dicoms
+xnatc --xnat=$HOST --project=$PROJ --subject=$SUB --experiment=$EXP --user=${CREDENTIALS[0]} --password=${CREDENTIALS[1]} --download=$DICOMDIR --download-resource=DICOM
+echo "Downloaded DICOM data to: $DICOMDIR"
+
+# Run UKB pipeline as a batch job
+MRIQC_SUBDIR=mriqc_out
+JOB_ID=`sbatch --parsable $CODEDIR/ukb/ukb.slurm $BIDS_DATASETDIR $WORKDIR $MRIQC_SUBDIR`
+echo "UKB job ID: $JOB_ID"
+
+# Run dependent job to do upload
+UPLOAD_JOB_ID=`sbatch --parsable --dependency=afterok:$JOB_ID $CODEDIR/ukb/upload.slurm $HOST $PROJ $SUB $EXP UKB $WORKDIR $MRIQC_SUBDIR ${CREDENTIALS[0]} ${CREDENTIALS[1]}`
+echo "UKB upload job ID: $UPLOAD_JOB_ID"
+
+} >$WORKDIR/out.log 2>$WORKDIR/err.log

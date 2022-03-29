@@ -1,0 +1,102 @@
+#!/gpfs01/software/imaging/miniconda3/envs/xnat/bin/python
+"""
+Script to upload data from UKB output to a known project/subject/session
+"""
+import sys
+import os 
+import tempfile
+import datetime
+
+import xnat
+import json
+
+__version__ = "0.0.1"
+
+XML_HEADER = """<?xml version="1.0" encoding="UTF-8"?>
+<UKBData xmlns="http://github.com/spmic-uon/xnat-hpc" xmlns:xnat="http://nrg.wustl.edu/xnat" xsi:schemaLocation="http://github.com/spmic-uon/xnat-hpc schema.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <xnat:label>%s</xnat:label>
+  <ukbVersion>%s</ukbVersion>"""
+
+XML_FOOTER = """
+</UKBData>"""
+
+print("Upload UKB: %s" % sys.argv)
+host_url = sys.argv[1]
+proj=sys.argv[2]
+subj=sys.argv[3]
+exp=sys.argv[4]
+bidsdir=sys.argv[5]
+assessor_name=sys.argv[6]
+user_alias = sys.argv[7]
+jsessionid = sys.argv[8]
+
+def is_int(num):
+    return num == float(int(num))
+
+def create_scanxml(fname, md):
+    xml = "  <scan>\n"
+    xml += "    <scan_id>%s</scan_id>\n" % fname[:fname.index(".")]
+    xml += "    <scan_type>%s</scan_type>\n" % md.get("bids_meta", {}).get("SeriesDescription", "(unknown)")
+    for key in [k for k in md if k not in ("bids_meta", "provenance")]:
+        tissue, test = "", key
+        if test.startswith("summary_"):
+            test = test.replace("summary_", "")
+        
+        parts = list(test.split("_"))
+        tissue = ""
+        for t in ("fg", "gm", "wm", "csf", "bg", "total"):
+            if t in parts:
+                tissue = t
+                parts.remove(t)
+                break
+
+        if not tissue:
+            tissue = "general"
+
+        test = "_".join(parts)
+        test_name = TEST_NAMES.get(test, test)
+
+        xml +="    <test>\n"
+        xml +="      <category>%s</category>\n" % tissue.upper()
+        xml +="      <id>%s</id>\n" % key.upper()
+        xml +="      <name>%s</name>\n" % test_name
+        if is_int(md[key]):
+            xml +="      <result>%i</result>\n" % int(md[key])
+        else:
+            xml +="      <result>%.4g</result>\n" % md[key]
+        xml +="    </test>\n"
+    xml += "  </scan>\n"
+    return xml
+
+def upload(sesdir):
+    json_files = []
+    xml = XML_HEADER % (assessor_name, __version__)
+    xml += "  <xnat:date>%s</xnat:date>\n" % datetime.datetime.today().strftime('%Y-%m-%d')
+    for subdir in os.listdir(sesdir):
+        print("Uploading files in %s" % subdir)
+        filedir = os.path.join(sesdir, subdir)
+        for fname in os.listdir(filedir):
+            print("Uploading: %s" % fname)
+            fpath = os.path.join(filedir, fname)
+            json_files.append(fpath)
+            with open(fpath) as f:
+                md = json.load(f)
+                xml += create_scanxml(fname, md)
+    xml += XML_FOOTER
+
+    f = None
+    try:
+        f = tempfile.NamedTemporaryFile(suffix=".xml", delete=False)
+        f.write(xml.encode("utf-8"))
+        f.close()
+        print(xml)
+        print("xnatc --user=%s --password=%s --xnat=%s --project=%s --subject=%s --experiment=%s --create-assessor=%s" % (user_alias, jsessionid, host_url, proj, subj, exp, f.name))
+        os.system("xnatc --user=%s --password=%s --xnat=%s --project=%s --subject=%s --experiment=%s --create-assessor=%s" % (user_alias, jsessionid, host_url, proj, subj, exp, f.name))
+    finally:
+        if f: os.unlink(f.name)
+
+    # Also upload each individual json file as a resource
+    for fpath in json_files:
+        print("xnatc --user=%s --password=%s --xnat=%s --project=%s --subject=%s --experiment=%s --assessor=%s --upload=%s --upload-resource=JSON" % (user_alias, jsessionid, host_url, proj, subj, exp, assessor_name, fpath))
+        os.system("xnatc --user=%s --password=%s --xnat=%s --project=%s --subject=%s --experiment=%s --assessor=%s --upload=%s --upload-resource=JSON" % (user_alias, jsessionid, host_url, proj, subj, exp, assessor_name, fpath))
+
