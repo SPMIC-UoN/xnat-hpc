@@ -21,7 +21,7 @@ MRIQC_OUT=$7
 USER=$8
 PASSWORD=$9
 
-$HOME/code/mriqc/upload.sh $HOST $PROJ $SUB $EXP $WORKDIR/$MRIQC_OUT $NAME $USER $PASSWORD >>$WORKDIR/out.log 2>>$WORKDIR/err.log
+$HOME/code/mriqc/upload $HOST $PROJ $SUB $EXP $WORKDIR/$MRIQC_OUT $NAME $USER $PASSWORD >>$WORKDIR/out.log 2>>$WORKDIR/err.log
 
 #rm -rf $WORKDIR
 
