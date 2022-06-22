@@ -82,7 +82,7 @@
     </parameters>
     <steps>
         <step id="1" description="Run remote command on HPC" workdirectory="^/Pipeline/parameters/parameter[name='workdir']/values/unique/text()^">
-            <resource name="run_hpc_ssh" location="msc/resources">
+            <resource name="run_hpc_ssh" location="spmic/resources">
                 <argument id="host">
                     <value>^concat('"',/Pipeline/parameters/parameter[name='host']/values/unique/text(),'"')^</value>
                 </argument>
