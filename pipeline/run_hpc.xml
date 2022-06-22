@@ -3,7 +3,7 @@
 <Pipeline xmlns="http://nrg.wustl.edu/pipeline" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://nrg.wustl.edu/pipeline ..\schema\pipeline.xsd"  xmlns:fileUtils="http://www.xnat.org/java/org.nrg.imagingtools.utils.FileUtils">
     <name>run_hpc</name>
     <!-- Filesystem path to the pipeline XML -->
-    <location>msc</location>
+    <location>spmic</location>
     <description>Run command on HPC</description>
     <resourceRequirements>
         <property name="DRMAA_JobTemplate_JobResource">-q XNAT</property>
