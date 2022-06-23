@@ -9,8 +9,8 @@
 #
 # Usage: run_hpc_ssh <XNAT host URL> <Project ID> <Subject ID> <Experiment ID> <Command to run>
 # 
-XNAT_SSH_KEY=/home/xnat/.ssh/id_rsa_hpc
-XNAT_BIN_DIR=/home/xnat/bin
+XNAT_SSH_KEY=/data/xnat/ssh/id_rsa_hpc
+XNAT_BIN_DIR=/data/xnat/bin
 XNAT_HPC_USER=service_hpc_xnat
 HPC_LOGIN_NODE=login001.augusta.nottingham.ac.uk
 
