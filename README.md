@@ -49,7 +49,7 @@ created, only readable by the tomcat user.
 
 Into this folder the public/private SSH key pair `id_rsa` and `id_rsa.pub` should be copied. Of course these
 are specific to the actual deployment. Generally the private key will be encrypted. The private key must have 
-`600` permissions.
+`600` permissions and the ssh folder should have 700 permissions, both owned by the tomcat user.
 
 ### Installing the helper scripts
 
@@ -58,9 +58,9 @@ must be created, readable by the Tomcat user. Into this folder must be copied th
 
 Edit the scripts to ensure that the paths to the SSH key and the chosen binary directory are correct.
 
-The file `pipeline/resources/run_hpc_ssh.xml` should then be edited and the line:
+The file `pipeline/resources/run_hpc_ssh.xml` should then be edited and if necessary the line:
 
-    <pip:location>/home/xnat/bin</pip:location>
+    <pip:location>/data/xnat/bin</pip:location>
 
 modified to contain the binary directory created above.
 
@@ -79,7 +79,10 @@ after - XNAT has bugs in this area!
 
 To start the SSH agent to allow passwordless login use:
 
-    sudo -u tomcat /home/xnat/bin/ssh-init-tomcat.sh
-    
+    sudo -u tomcat /data/xnat/bin/ssh-init-tomcat.sh
+
+(or using whichever folder you installed the helper scripts in)
+
 This will prompt for the key passphrase (if any).
+
 
