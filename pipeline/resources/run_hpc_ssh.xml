@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pip:Resource xmlns:pip="http://nrg.wustl.edu/pipeline">
     <pip:name>run_hpc_ssh</pip:name>
-    <pip:location>/home/xnat/bin</pip:location>
+    <pip:location>/data/xnat/bin</pip:location>
     <pip:type>Executable</pip:type>
     <pip:description>Runs command on HPC via SSH</pip:description>
     <pip:input>
