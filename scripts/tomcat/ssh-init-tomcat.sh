@@ -8,8 +8,8 @@
 #
 # It will prompt for the passphrase of the authentication key
 
-XNAT_SSH_KEY=/home/xnat/.ssh/id_rsa_hpc
-XNAT_SSH_AGENT_ENVFILE=/home/xnat/.ssh/ssh-agent-tomcat-env
+XNAT_SSH_KEY=/data/xnat/ssh/id_rsa_hpc
+XNAT_SSH_AGENT_ENVFILE=/data/xnat/ssh/ssh-agent-tomcat-env
 
 ssh-agent >${XNAT_SSH_AGENT_ENVFILE}
 . ${XNAT_SSH_AGENT_ENVFILE}
