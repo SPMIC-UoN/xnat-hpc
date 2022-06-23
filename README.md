@@ -69,6 +69,8 @@ modified to contain the binary directory created above.
 The file `pipeline/run_hpc.xml` needs to be copied to a subfolder of the XNAT pipeline folder, namely
 `{XNAT_PIPELINE_DIR}/catalog/spmic/`
 
+The XNAT pipeline folder is normally called `pipeline` and is located in the XNAT install directory, e.g. `/data/xnat/pipeline`
+
 The folder `pipeline/resources` and the modified `pipeline/resources/run_hpc_ssh.xml` needs to be copied to the same destination.
 
 From within XNAT, the pipeline can then be enabled by selecting `Administer->Pipelines` and then `Add Pipeline to Repository`.
