@@ -14,6 +14,13 @@ XNAT_BIN_DIR=/data/xnat/bin
 XNAT_HPC_USER=service_hpc_xnat
 HPC_LOGIN_NODE=login001.augusta.nottingham.ac.uk
 
+# This is required because XNAT sometimes likes to run the pipeline script with
+# --version as an argument and we don't want that getting sent to the HPC
+if [ $1 = "--version" ]; then
+  echo "0.0.1"
+  exit 0
+fi
+
 echo "run_hpc_ssh.sh"
 echo $@
 . ${XNAT_BIN_DIR}/bin/ssh-agent-tomcat-env
