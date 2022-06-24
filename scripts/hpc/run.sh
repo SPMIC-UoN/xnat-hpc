@@ -7,6 +7,7 @@
 import os
 import sys
 import logging
+from pathlib import Path
 
 LOG = logging.getLogger("XNAT_HPC")
 LOG_LEVEL = logging.INFO
@@ -25,14 +26,15 @@ if len(sys.argv) != 8:
     sys.exit(1)
 
 cmd, host, jsessionid, proj, subj, exp, args = sys.argv[1:]
-cmd = os.path.join(HPC_COMMAND_DIR, cmd, "run")
-if not os.path.isfile(cmd):
+cmd = Path(HPC_COMMAND_DIR, cmd, "run").resolve()
+if not Path(HPC_COMMAND_DIR).resolve() in cmd.parents:
+    LOG.error("Command: %s not in correct XNAT commands folder", cmd)
+elif not os.path.isfile(cmd):
     LOG.error("No such command: %s", cmd)
 else:
     os.environ["CURL_CA_BUNDLE"] = ""
-    fullcmd = cmd + f' "{host}" "{jsessionid}" "{proj}" "{subj}" "{exp}" {args}'
+    fullcmd = str(cmd) + f' "{host}" "{jsessionid}" "{proj}" "{subj}" "{exp}" {args}'
     LOG.info(fullcmd)
     retval = os.system(fullcmd)
     if retval != 0:
         LOG.error("Exit status: %i: %s", retval, fullcmd)
-
