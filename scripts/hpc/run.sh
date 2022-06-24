@@ -4,7 +4,7 @@
 # have a level of indirection that can be used in the
 # future for better error handling etc and which doesn't
 # require changes on the XNAT instance
-HPC_COMMAND_DIR=$HOME/code
+HPC_COMMAND_DIR=$HOME/xnat-hpc/scripts/hpc/hpc-commands
 
 CMD=$1
 HOST=$2
