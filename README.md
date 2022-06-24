@@ -77,6 +77,13 @@ From within XNAT, the pipeline can then be enabled by selecting `Administer->Pip
 The full path to the file `run_hpc.xml` should be entered. Be careful not to include any spaces before or
 after - XNAT has bugs in this area!
 
+### Enable the Build action on the MR session data type
+
+Navigate to `Administer->Data Types` and select the `MRSession` data type. Then follow the following instructions to enable the 'Build Pipeline'
+action on MR sessions:
+
+https://wiki.xnat.org/display/XNAT17/Installing+Pipelines+in+XNAT#InstallingPipelinesinXNAT-EnablingthePipelineBuildActiononyourXNATDataType
+
 ### Starting the SSH agent
 
 To start the SSH agent to allow passwordless login use:
