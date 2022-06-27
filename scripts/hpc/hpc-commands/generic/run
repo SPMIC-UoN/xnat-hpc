@@ -12,8 +12,8 @@ EXP=$6
 ARGS=$7
 
 # Basic info FIXME tempdir is not ideal
-SHARED_CODEDIR=`basename "$0"`
-SCRIPTDIR=$SHARED_CODEDIR/../$SCRIPTNAME
+CODEDIR=`dirname "$0"`/..
+SCRIPTDIR=$CODEDIR/$SCRIPTNAME
 TEMPDIR=$HOME/tmp
 
 # Create working directory
@@ -25,24 +25,24 @@ echo $@
 echo "Working directory: $WORKDIR"
 
 # Convert session ID into a user alias token for subsequent upload authentication
-CREDENTIALS=`$SHARED_CODEDIR/get_user_alias $HOST $JSESSION`
+CREDENTIALS=`$CODEDIR/generic/get_user_alias $HOST $JSESSION`
 CREDENTIALS=($CREDENTIALS)
 echo "Obtained user alias token - alias: ${CREDENTIALS[0]}"
 
 # Submit data stage batch job
-STAGE_JOB_ID=`sbatch --parsable $SHARED_CODEDIR/stage.slurm $HOST $PROJ $SUB $EXP ${CREDENTIALS[0]} ${CREDENTIALS[1]} $WORKDIR`
+STAGE_JOB_ID=`sbatch --parsable $CODEDIR/generic/stage.slurm $HOST $PROJ $SUB $EXP ${CREDENTIALS[0]} ${CREDENTIALS[1]} $WORKDIR $CODEDIR`
 echo "$SCRIPTNAME Data stage job ID: $STAGE_JOB_ID"
 
 # Submit dependent processing batch job
-PROC_JOB_ID=`sbatch --parsable --dependency=afterok:$STAGE_JOB_ID $SCRIPTDIR/run.slurm $WORKDIR`
+PROC_JOB_ID=`sbatch --parsable --dependency=afterok:$STAGE_JOB_ID $SCRIPTDIR/run.slurm $WORKDIR $CODEDIR`
 echo "$SCRIPTNAME processing job ID: $PROC_JOB_ID"
 
 # Submit dependent job upload batch job
-UPLOAD_JOB_ID=`sbatch --parsable --dependency=afterok:$PROC_JOB_ID $SHARED_CODEDIR/upload.slurm $HOST $PROJ $SUB $EXP ${CREDENTIALS[0]} ${CREDENTIALS[1]} $WORKDIR`
+UPLOAD_JOB_ID=`sbatch --parsable --dependency=afterok:$PROC_JOB_ID $CODEDIR/generic/upload.slurm $HOST $PROJ $SUB $EXP ${CREDENTIALS[0]} ${CREDENTIALS[1]} $WORKDIR $CODEDIR`
 echo "$SCRIPTNAME upload job ID: $UPLOAD_JOB_ID"
 
 # Submit dependent cleanup job
-CLEANUP_JOB_ID=`sbatch --parsable --dependency=afterok:$UPLOAD_JOB_ID $SHARED_CODEDIR/cleanup.slurm $WORKDIR`
+CLEANUP_JOB_ID=`sbatch --parsable --dependency=afterok:$UPLOAD_JOB_ID $CODEDIR/generic/cleanup.slurm $WORKDIR $CODEDIR`
 echo "$SCRIPTNAME cleanup job ID: $CLEANUP_JOB_ID"
 
 } >$WORKDIR/out.log 2>$WORKDIR/err.log

@@ -9,11 +9,11 @@
 #SBATCH --qos=img
 
 SIMG=/software/imaging/singularity_images/poldracklab_mriqc-2021-01-30-767af1135fae.simg
-SCRIPTDIR=`dirname "$0"`
 WORKDIR=$1
+CODEDIR=$2
 INDIR=$WORKDIR/bids
 OUTDIR=$WORKDIR/mriqc_out
 
 module load singularity
 singularity run --cleanenv $SIMG $INDIR $OUTDIR participant --no-sub >>$WORKDIR/out.log 2>>$WORKDIR/err.log
-$SCRIPTDIR/create_assessor $WORKDIR
+$CODEDIR/mriqc/create_assessor $WORKDIR

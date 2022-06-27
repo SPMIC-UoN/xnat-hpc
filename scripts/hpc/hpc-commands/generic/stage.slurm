@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
-#SBATCH --memory=2gb
+#SBATCH --mem=2G
 #SBATCH --time=01:00:00
 #SBATCH --job-name=stage_bids
 #SBATCH --partition=imgcomputeq
@@ -17,6 +17,7 @@ EXP=$4
 USER=$5
 PASSWORD=$6
 WORKDIR=$7
+CODEDIR=$8
 
 module load conda-img
 source activate xnat

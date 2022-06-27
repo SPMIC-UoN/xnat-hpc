@@ -10,6 +10,7 @@
 #SBATCH --qos=img
 
 WORKDIR=$1
+CODEDIR=$2
 
 rm -rf $WORKDIR
 

@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
-#SBATCH --memory=10
+#SBATCH --mem=10
 #SBATCH --time=00:05:00
 #SBATCH --job-name=test
 #SBATCH --partition=imgcomputeq
