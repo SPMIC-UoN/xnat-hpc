@@ -1,0 +1,48 @@
+#!/bin/bash -x
+#
+# XNAT skeleton remote command
+
+# Arguments passed by XNAT pipeline script
+SCRIPTNAME=$1
+HOST=$2
+JSESSION=$3
+PROJ=$4
+SUB=$5
+EXP=$6
+ARGS=$7
+
+# Basic info FIXME tempdir is not ideal
+SHARED_CODEDIR=`basename "$0"`
+SCRIPTDIR=$SHARED_CODEDIR/../$SCRIPTNAME
+TEMPDIR=$HOME/tmp
+
+# Create working directory
+WORKDIR=`mktemp -d -p $TEMPDIR $SCRIPTNAME_XXXXXX`
+
+# Braces to send stdout/stderr to logfiles in working dir
+{
+echo $@
+echo "Working directory: $WORKDIR"
+
+# Convert session ID into a user alias token for subsequent upload authentication
+CREDENTIALS=`$SHARED_CODEDIR/get_user_alias $HOST $JSESSION`
+CREDENTIALS=($CREDENTIALS)
+echo "Obtained user alias token - alias: ${CREDENTIALS[0]}"
+
+# Submit data stage batch job
+STAGE_JOB_ID=`sbatch --parsable $SHARED_CODEDIR/stage.slurm $HOST $PROJ $SUB $EXP ${CREDENTIALS[0]} ${CREDENTIALS[1]} $WORKDIR`
+echo "$SCRIPTNAME Data stage job ID: $STAGE_JOB_ID"
+
+# Submit dependent processing batch job
+PROC_JOB_ID=`sbatch --parsable --dependency=afterok:$STAGE_JOB_ID $SCRIPTDIR/run.slurm $WORKDIR`
+echo "$SCRIPTNAME processing job ID: $PROC_JOB_ID"
+
+# Submit dependent job upload batch job
+UPLOAD_JOB_ID=`sbatch --parsable --dependency=afterok:$PROC_JOB_ID $SHARED_CODEDIR/upload.slurm $HOST $PROJ $SUB $EXP ${CREDENTIALS[0]} ${CREDENTIALS[1]} $WORKDIR`
+echo "$SCRIPTNAME upload job ID: $UPLOAD_JOB_ID"
+
+# Submit dependent cleanup job
+CLEANUP_JOB_ID=`sbatch --parsable --dependency=afterok:$UPLOAD_JOB_ID $SHARED_CODEDIR/cleanup.slurm $WORKDIR`
+echo "$SCRIPTNAME cleanup job ID: $CLEANUP_JOB_ID"
+
+} >$WORKDIR/out.log 2>$WORKDIR/err.log

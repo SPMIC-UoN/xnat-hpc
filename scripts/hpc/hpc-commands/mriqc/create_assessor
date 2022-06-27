@@ -1,13 +1,12 @@
 #!/gpfs01/software/imaging/miniconda3/envs/xnat/bin/python
 """
-Script to upload data from a BIDS compliant MRIQC output to a known project/subject/session
+Script to create assessor XML from a BIDS compliant MRIQC output
 """
 import sys
 import os 
-import tempfile
+import shutil
 import datetime
 
-import xnat
 import json
 
 __version__ = "0.0.1"
@@ -70,16 +69,6 @@ TEST_NAMES = {
     "tsnr" : "Temporal SNR (tSNR, tsnr) is a simplified interpretation of the tSNR definition [Kruger2001].",
 }
 
-print("Upload MRIQC: %s" % sys.argv)
-host_url = sys.argv[1]
-proj=sys.argv[2]
-subj=sys.argv[3]
-exp=sys.argv[4]
-bidsdir=sys.argv[5]
-assessor_name=sys.argv[6]
-user_alias = sys.argv[7]
-jsessionid = sys.argv[8]
-
 def bids_match(bids_name, xnat_name):
     ret = bids_name.endswith(xnat_name.replace(" ", "").replace("_", "").replace("-", ""))
     print("Match? %s : %s -> %s" % (bids_name, xnat_name, ret))
@@ -123,15 +112,16 @@ def create_scanxml(fname, md):
     xml += "  </scan>\n"
     return xml
 
-def upload(sesdir):
+def create_assessor_xml(sesdir):
     json_files = []
-    xml = XML_HEADER % (assessor_name, __version__)
+    label = "MRIQC" # FIXME make unique
+    xml = XML_HEADER % (label, __version__)
     xml += "  <xnat:date>%s</xnat:date>\n" % datetime.datetime.today().strftime('%Y-%m-%d')
     for subdir in os.listdir(sesdir):
-        print("Uploading files in %s" % subdir)
+        print("Creating assessor content for %s" % subdir)
         filedir = os.path.join(sesdir, subdir)
         for fname in os.listdir(filedir):
-            print("Uploading: %s" % fname)
+            print("Handling: %s" % fname)
             fpath = os.path.join(filedir, fname)
             json_files.append(fpath)
             with open(fpath) as f:
@@ -139,28 +129,24 @@ def upload(sesdir):
                 xml += create_scanxml(fname, md)
     xml += XML_FOOTER
 
-    # Create the MRIQC resource with QC data as key/value fields
-    f = None
-    try:
-        f = tempfile.NamedTemporaryFile(suffix=".xml", delete=False)
-        f.write(xml.encode("utf-8"))
-        f.close()
-        print(xml)
-        print("xnatc --user=%s --password=%s --xnat=%s --project=%s --subject=%s --experiment=%s --create-assessor=%s" % (user_alias, jsessionid, host_url, proj, subj, exp, f.name))
-        os.system("xnatc --user=%s --password=%s --xnat=%s --project=%s --subject=%s --experiment=%s --create-assessor=%s" % (user_alias, jsessionid, host_url, proj, subj, exp, f.name))
-    finally:
-        if f: os.unlink(f.name)
-
-    # Also upload each individual json file as a resource
+    with open(os.path.join(assessordir, "mriqc.xml", "w")) as f:
+        f.write(xml)
+    jsondir = os.path.join(assessordir, "mriqc", "json")
+    os.makedirs(jsondir)
     for fpath in json_files:
-        print("xnatc --user=%s --password=%s --xnat=%s --project=%s --subject=%s --experiment=%s --assessor=%s --upload=%s --upload-resource=JSON" % (user_alias, jsessionid, host_url, proj, subj, exp, assessor_name, fpath))
-        os.system("xnatc --user=%s --password=%s --xnat=%s --project=%s --subject=%s --experiment=%s --assessor=%s --upload=%s --upload-resource=JSON" % (user_alias, jsessionid, host_url, proj, subj, exp, assessor_name, fpath))
+        fname = os.path.basename(fpath)
+        shutil.copy(fpath, os.path.join(jsondir, fname))
+
+print("MRIQC - Create assessor: %s" % sys.argv)
+workdir = sys.argv[1]
+mriqcdir = os.path.join(workdir, "mriqc_out")
+assessordir = os.path.join(workdir, "xnat-upload")
 
 # FIXME no project toplevel dir at present
-#for bidsproj in os.listdir(bidsdir):
+#for bidsproj in os.listdir(mriqcdir):
 #    if bids_match(proj, bidsproj):
-#        projdir = os.path.join(bidsdir, bidsproj)
-projdir = bidsdir
+#        projdir = os.path.join(mriqcdir, bidsproj)
+projdir = mriqcdir
 for bidssubj in os.listdir(projdir):
     # FIXME issue with subject name vs internal XNAT subject ID
     #    if bids_match(bidssubj, subj):
@@ -173,4 +159,4 @@ for bidssubj in os.listdir(projdir):
                 sesdir = os.path.join(subjdir, bidsses)
                 print("Found session dir: %s" % sesdir)
                 print("Uploading contents of %s" % sesdir)
-                upload(sesdir)
+                create_assessor_xml(sesdir)

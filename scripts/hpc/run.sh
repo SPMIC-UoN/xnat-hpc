@@ -26,14 +26,14 @@ if len(sys.argv) != 8:
     sys.exit(1)
 
 cmd, host, jsessionid, proj, subj, exp, args = sys.argv[1:]
-cmd = Path(HPC_COMMAND_DIR, cmd, "run").resolve()
-if not Path(HPC_COMMAND_DIR).resolve() in cmd.parents:
+impl_cmd = Path(HPC_COMMAND_DIR, cmd, "run.slurm").resolve()
+if not Path(HPC_COMMAND_DIR).resolve() in impl_cmd.parents:
     LOG.error("Command: %s not in correct XNAT commands folder", cmd)
 elif not os.path.isfile(cmd):
     LOG.error("No such command: %s", cmd)
 else:
     os.environ["CURL_CA_BUNDLE"] = ""
-    fullcmd = str(cmd) + f' "{host}" "{jsessionid}" "{proj}" "{subj}" "{exp}" {args}'
+    fullcmd = os.path.join(HPC_COMMAND_DIR, "generic", "run") + f' "{cmd}" "{host}" "{jsessionid}" "{proj}" "{subj}" "{exp}" {args}'
     LOG.info(fullcmd)
     retval = os.system(fullcmd)
     if retval != 0:
