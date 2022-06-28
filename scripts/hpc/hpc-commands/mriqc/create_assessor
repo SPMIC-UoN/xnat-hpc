@@ -129,7 +129,7 @@ def create_assessor_xml(sesdir):
                 xml += create_scanxml(fname, md)
     xml += XML_FOOTER
 
-    with open(os.path.join(assessordir, "mriqc.xml", "w")) as f:
+    with open(os.path.join(assessordir, "mriqc.xml"), "w") as f:
         f.write(xml)
     jsondir = os.path.join(assessordir, "mriqc", "json")
     os.makedirs(jsondir)
@@ -141,6 +141,7 @@ print("MRIQC - Create assessor: %s" % sys.argv)
 workdir = sys.argv[1]
 mriqcdir = os.path.join(workdir, "mriqc_out")
 assessordir = os.path.join(workdir, "xnat-upload")
+os.makedirs(assessordir, exist_ok=True)
 
 # FIXME no project toplevel dir at present
 #for bidsproj in os.listdir(mriqcdir):
@@ -155,7 +156,7 @@ for bidssubj in os.listdir(projdir):
     if os.path.isdir(subjdir) and bidssubj != "logs":
         print("Found subject dir: %s" % subjdir)
         for bidsses in os.listdir(subjdir):
-            if bids_match(bidsses, exp):
+            #if bids_match(bidsses, exp):
                 sesdir = os.path.join(subjdir, bidsses)
                 print("Found session dir: %s" % sesdir)
                 print("Uploading contents of %s" % sesdir)
