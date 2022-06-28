@@ -2,3 +2,4 @@
 Dockerfile
 plugin/.gradle
 plugin/build
+*.log
