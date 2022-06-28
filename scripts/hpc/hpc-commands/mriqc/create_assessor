@@ -69,6 +69,11 @@ TEST_NAMES = {
     "tsnr" : "Temporal SNR (tSNR, tsnr) is a simplified interpretation of the tSNR definition [Kruger2001].",
 }
 
+def get_label(cmd):
+    now = datetime.datetime.now()
+    timestamp = now.strftime("%Y%m%d_%H%M%S")
+    return f"{cmd}_{timestamp}"
+
 def bids_match(bids_name, xnat_name):
     ret = bids_name.endswith(xnat_name.replace(" ", "").replace("_", "").replace("-", ""))
     print("Match? %s : %s -> %s" % (bids_name, xnat_name, ret))
@@ -114,7 +119,7 @@ def create_scanxml(fname, md):
 
 def create_assessor_xml(sesdir):
     json_files = []
-    label = "MRIQC" # FIXME make unique
+    label = get_label("MRIQC")
     xml = XML_HEADER % (label, __version__)
     xml += "  <xnat:date>%s</xnat:date>\n" % datetime.datetime.today().strftime('%Y-%m-%d')
     for subdir in os.listdir(sesdir):
