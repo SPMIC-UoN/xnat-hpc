@@ -28,7 +28,7 @@ GENERIC_ASSESSOR_XML = """<?xml version="1.0" encoding="UTF-8"?>
 
 def get_label(cmd):
     now = datetime.datetime.now()
-    timestamp = now.strftime("%Y%m%d %H%M%S")
+    timestamp = now.strftime("%Y%m%d_%H%M%S")
     return f"{cmd}_{timestamp}"
 
 def upload_logs(assessor):
@@ -56,6 +56,13 @@ def upload_assessor(fname):
     print(cmd)
     os.system(cmd)
 
+    # Need to get the label of the assessor so we can upload files against it
+    import xml.etree.ElementTree as ET
+    root = ET.parse(fname).getroot()
+    for label_type in root.findall('label'):
+        label = label_type.text
+    print("Label is %s" % label)
+
     assessor_name = os.path.basename(fname).rstrip(".xml")
     resource_dir = os.path.join(uploaddir, assessor_name)
     for dirname in os.listdir(resource_dir):
@@ -64,7 +71,7 @@ def upload_assessor(fname):
             for fname in os.listdir(dpath):
                 fpath = os.path.join(dpath, fname)
                 if os.path.isfile(fpath):
-                    upload_resource(fpath, assessor_name, dirname.upper())
+                    upload_resource(fpath, label, dirname.upper())
 
     upload_logs(label)
 
