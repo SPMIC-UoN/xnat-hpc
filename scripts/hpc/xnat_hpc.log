@@ -1,0 +1,22 @@
+ERROR:XNAT_HPC:Called withincorrect number of arguments: 1 (['./run.sh'])
+ERROR:XNAT_HPC:Called with incorrect number of arguments: 1 (['./run.sh'])
+INFO:XNAT_HPC:hpc-commands/test/run "host" "jsess" "proj" "sub" "exp" args for cmd
+ERROR:XNAT_HPC:Exit status: 32512: hpc-commands/test/run "host" "jsess" "proj" "sub" "exp" args for cmd
+ERROR:XNAT_HPC:No such command: hpc-commands/test/run
+INFO:XNAT_HPC:hpc-commands/test/runrun "host" "jsess" "proj" "sub" "exp" args for cmd
+ERROR:XNAT_HPC:Exit status: 32512: hpc-commands/test/runrun "host" "jsess" "proj" "sub" "exp" args for cmd
+ERROR:XNAT_HPC:No such command: hpc-commands/test/run
+INFO:XNAT_HPC:hpc-commands/test/runrun "host" "jsess" "proj" "sub" "exp" args for cmd
+ERROR:XNAT_HPC:Exit status: 32512: hpc-commands/test/runrun "host" "jsess" "proj" "sub" "exp" args for cmd
+INFO:XNAT_HPC:hpc-commands/test/run "host" "jsess" "proj" "sub" "exp" args for cmd
+INFO:XNAT_HPC:hpc-commands/mriqc/run "host" "jsess" "proj" "sub" "exp" args for cmd
+ERROR:XNAT_HPC:Exit status: 256: hpc-commands/mriqc/run "host" "jsess" "proj" "sub" "exp" args for cmd
+INFO:XNAT_HPC:hpc-commands/mriqc/run "host" "jsess" "proj" "sub" "exp" args for cmd
+ERROR:XNAT_HPC:Exit status: 256: hpc-commands/mriqc/run "host" "jsess" "proj" "sub" "exp" args for cmd
+ERROR:XNAT_HPC:Called with incorrect number of arguments: 2 (['./run.sh', 'test'])
+INFO:XNAT_HPC:hpc-commands/test/run "a" "s" "d" "f" "g" h
+ERROR:XNAT_HPC:No such command: hpc-commands/../../test/run
+ERROR:XNAT_HPC:No such command: hpc-commands/../../test/run
+ERROR:XNAT_HPC:No such command: hpc-commands/../../test/run
+ERROR:XNAT_HPC:Command: /home/martin/code/xnat-hpc/scripts/test/run not in correct XNAT commands folder
+ERROR:XNAT_HPC:Command: /home/martin/code/xnat-hpc/scripts/test/run not in correct XNAT commands folder

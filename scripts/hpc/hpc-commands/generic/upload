@@ -15,20 +15,64 @@ the logs may be useful to the user.s
 import glob
 import sys
 import os
+import tempfile
+import datetime
 
 __version__ = "0.0.1"
 
-def create_assessor(fname):
+
+GENERIC_ASSESSOR_XML = """<?xml version="1.0" encoding="UTF-8"?>
+<xnat:mrAssessorData xmlns="http://nrg.wustl.edu/xnat" xmlns:xnat="http://nrg.wustl.edu/xnat" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <xnat:label>%s</xnat:label>
+</xnat:mrAssessorData>"""
+
+def get_label(cmd):
+    now = datetime.datetime.now()
+    timestamp = now.strftime("%Y%m%d %H%M%S")
+    return f"{cmd}_{timestamp}"
+
+def upload_logs(assessor):
+    upload_resource(os.path.join(workdir, "out.log"), assessor, "LOGS")
+    upload_resource(os.path.join(workdir, "err.log"), assessor, "LOGS")
+
+def upload_generic_assessor(cmd):
+    label = get_label(cmd)
+    xml = GENERIC_ASSESSOR_XML % label
+    print(xml)
+    with tempfile.NamedTemporaryFile() as f:
+        f.write(xml)
+
+        cmd = "xnatc --user=%s --password=%s --xnat=%s --project=%s --subject=%s --experiment=%s --create-assessor=%s" % (user, passwd, host, proj, subj, exp, f.name)
+        print(cmd)
+        #os.system(cmd)
+    upload_logs(label)
+
+def upload_assessor(fname):
     # Create an assessor on XNAT from an XML document
     with open(fname, "r") as f:
         print(f.read())
 
-    cmd = "xnatc --user=%s --password=%s --xnat=%s --project=%s --subject=%s --experiment=%s --create-assessor=%s" % (user, passwd, host, proj, subj, exp, f.name)
+    cmd = "xnatc --user=%s --password=%s --xnat=%s --project=%s --subject=%s --experiment=%s --create-assessor=%s" % (user, passwd, host, proj, subj, exp, fname)
     print(cmd)
-    os.system(cmd)
+    #os.system(cmd)
+
+    assessor_name = os.path.basename(fname).rstrip(".xml")
+    resource_dir = os.path.join(workdir, assessor_name)
+    for dirname in os.listdir(resource_dir)
+        dpath = os.path.join(resource_dir, dirname)
+        if os.path.isdir(dpath):
+            for fname in os.listdir(dpath):
+                fpath = os.path.join(dpath, fname)
+                if os.path.isfile(fpath):
+                    upload_resource(fpath, label, dirname.upper())
+
+    upload_logs(label)
 
 def upload_resource(fname, assessor, resource_type):
     # Upload a file as a resource on an assessor
+    if not os.path.isfile(fname):
+        print("WARNING: Resource file %s not found - will not upload" % fname)
+        return
     cmd = "xnatc --user=%s --password=%s --xnat=%s --project=%s --subject=%s --experiment=%s --assessor=%s --upload=%s --upload-resource=%s" % (user, passwd, host, proj, subj, exp, assessor, fname, resource_type)
     print(cmd)
     os.system(cmd)
@@ -41,7 +85,16 @@ host, proj, subj, exp, user, passwd, workdir = sys.argv[1:]
 uploaddir = os.path.join(workdir, "xnat-upload")
 if not os.path.exists(uploaddir):
     # FIXME upload logs to where?
-    sys.stderr.write("Upload directory %s not found - will continue to upload logs\n")
-
-for assessor in glob.glob(os.path.join("xnat-upload", "*.xml")):
-    create_assessor(assessor)
+    sys.stderr.write("WARNING: Upload directory %s not found - will create generic assessor to store logs\n")
+    upload_generic_assessor()
+else:
+    assessor_xmls = list(glob.glob(os.path.join("xnat-upload", "*.xml")))
+    if len(assessor_xmls) > 1:
+        sys.stderr.write("WARNING: More than one assessor XML document found: %s - only first will be used" % assessor_xmls)
+        upload_assessor(assessor_xmls[0])
+    elif len(assessor_xmls) == 0:
+        sys.stderr.write("WARNING: No assessor XML found - will create generic assessor to store logs")
+        upload_generic_assessor()
+    else:
+        upload_assessor(assessor_xmls[0])
+upload_logs()
