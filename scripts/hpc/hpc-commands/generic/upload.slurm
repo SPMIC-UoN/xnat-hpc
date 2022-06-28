@@ -4,8 +4,8 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=32gb
-#SBATCH --time=01:00:00
+#SBATCH --mem=8gb
+#SBATCH --time=00:20:00
 #SBATCH --job-name=upload
 #SBATCH --partition=imgcomputeq
 #SBATCH --qos=img
@@ -20,6 +20,4 @@ WORKDIR=$7
 CODEDIR=$8
 
 $CODEDIR/generic/upload $HOST $PROJ $SUB $EXP $USER $PASSWORD $WORKDIR >>$WORKDIR/out.log 2>>$WORKDIR/err.log
-
-#rm -rf $WORKDIR
 
