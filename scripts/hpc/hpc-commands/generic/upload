@@ -54,17 +54,17 @@ def upload_assessor(fname):
 
     cmd = "xnatc --user=%s --password=%s --xnat=%s --project=%s --subject=%s --experiment=%s --create-assessor=%s" % (user, passwd, host, proj, subj, exp, fname)
     print(cmd)
-    #os.system(cmd)
+    os.system(cmd)
 
     assessor_name = os.path.basename(fname).rstrip(".xml")
-    resource_dir = os.path.join(workdir, assessor_name)
-    for dirname in os.listdir(resource_dir)
+    resource_dir = os.path.join(uploaddir, assessor_name)
+    for dirname in os.listdir(resource_dir):
         dpath = os.path.join(resource_dir, dirname)
         if os.path.isdir(dpath):
             for fname in os.listdir(dpath):
                 fpath = os.path.join(dpath, fname)
                 if os.path.isfile(fpath):
-                    upload_resource(fpath, label, dirname.upper())
+                    upload_resource(fpath, assessor_name, dirname.upper())
 
     upload_logs(label)
 
@@ -75,7 +75,7 @@ def upload_resource(fname, assessor, resource_type):
         return
     cmd = "xnatc --user=%s --password=%s --xnat=%s --project=%s --subject=%s --experiment=%s --assessor=%s --upload=%s --upload-resource=%s" % (user, passwd, host, proj, subj, exp, assessor, fname, resource_type)
     print(cmd)
-    os.system(cmd)
+    #os.system(cmd)
 
 print("XNAT_HPC: UPLOADER v%s" % __version__)
 if len(sys.argv) != 8:
