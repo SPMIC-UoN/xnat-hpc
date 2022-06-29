@@ -8,10 +8,10 @@
     <xs:element name="PipelineData" type="xnat_hpc:PipelineData"/>
     <xs:complexType name="PipelineData">
         <xs:annotation>
-            <xs:documentation>ImageAssessor which encapsulates the output from running a named pipeline</xs:documentation>
+            <xs:documentation>ImageAssessor which encapsulates output from running a generic named pipeline</xs:documentation>
         </xs:annotation>
         <xs:complexContent>
-            <xs:extension base="xnat:imageAssessorData">
+            <xs:extension base="xnat:mrAssessorData">
                 <xs:sequence>
                     <xs:element name="pipelineName" minOccurs="1" maxOccurs="1">
                         <xs:annotation>
@@ -28,6 +28,16 @@
                         <xs:simpleType>
                             <xs:restriction base="xs:string"/>
                         </xs:simpleType>
+                    </xs:element>
+                    <xs:element name="test" minOccurs="0" maxOccurs="unbounded">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="id" type="xs:string" minOccurs="1" maxOccurs="1"/>
+                                <xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1"/>
+                                <xs:element name="category" minOccurs="0" maxOccurs="1"/>
+                                <xs:element name="result" minOccurs="1" maxOccurs="1"/>
+                           </xs:sequence>
+                        </xs:complexType>
                     </xs:element>
                 </xs:sequence>
             </xs:extension>

@@ -1,0 +1,43 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2//EN">
+$page.setTitle("Pipeline Details")
+$page.setLinkColor($ui.alink)
+$page.setVlinkColor($ui.vlink)
+#if ($turbineUtils.GetPassedParameter("popup", $data))
+	#set ($popup = $turbineUtils.GetPassedParameter("popup", data) )
+	#set ($popup = "false")
+#end
+
+#set($result_td_style = "background-color: #fff; color: #000; padding: 2px; border-width: 1px; border-color: #000000; border-style: solid;")
+#set($table_style = "width: 80%; border-collapse: collapse; border-width: 2px; border-color: #000000; border-style: solid;")
+
+<div>
+    <h2>Pipeline report</h2>
+
+	<TABLE width="80%">
+	    <TR>
+			<TD style="width: 100%;">
+				<TABLE>
+					<TR><TD>ID</TD><TD>$!item.getStringProperty("xnat_hpc:PipelineData/ID")</TD></TR>
+					<TR><TD>imageSession_ID</TD><TD>$!item.getStringProperty("xnat_hpc:PipelineData/imageSession_ID")</TD></TR>
+					<TR><TD>project</TD><TD>$!item.getStringProperty("xnat_hpc:PipelineData/project")</TD></TR>
+					<TR><TD>date</TD><TD>$!item.getProperty("xnat_hpc:PipelineData/date")</TD></TR>
+					<TR><TD>pipeline name</TD><TD>$!item.getStringProperty("xnat_hpc:PipelineData/pipelineName")</TD></TR>
+					<TR><TD>pipeline version</TD><TD>$!item.getStringProperty("xnat_hpc:PipelineData/pipelineVersion")</TD></TR>
+				</TABLE>
+			</TD>
+			<TD style="white-space: nowrap;">#parse($turbineUtils.getTemplateName("actions",$om.getXSIType(),$project))</TD>
+		</TR>
+	</TABLE>
+
+	<TABLE style="$table_style">
+    #foreach ($scan in $item.getChildItems("xnat_hpc:PipelineData/test"))
+		<TR>
+			<TD style="$result_td_style">$!test.getStringProperty("id")</TD>
+			<TD style="$result_td_style">$!test.getStringProperty("category")</TD>
+			<TD style="$result_td_style">$!test.getStringProperty("name")</TD>
+			<TD style="$result_td_style">$!test.getStringProperty("result")</TD>
+		</TR>
+	#end
+	</TABLE>
+</div><BR>
+#parse("/screens/ReportProjectSpecificFields.vm")
