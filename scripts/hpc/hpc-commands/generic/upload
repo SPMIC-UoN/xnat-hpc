@@ -11,7 +11,6 @@ If no assessor is created a generic assessor type will be created in order
 to attach the process logs to. The likely cause is that the process failed so
 the logs may be useful to the user.s
 """
-#!/gpfs01/software/imaging/miniconda3/envs/xnat/bin/python
 import glob
 import sys
 import os
@@ -20,11 +19,11 @@ import datetime
 
 __version__ = "0.0.1"
 
-
 GENERIC_ASSESSOR_XML = """<?xml version="1.0" encoding="UTF-8"?>
-<xnat:mrAssessorData xmlns="http://nrg.wustl.edu/xnat" xmlns:xnat="http://nrg.wustl.edu/xnat" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<PipelineData xmlns="http://github.com/spmic-uon/xnat-hpc" xmlns:xnat="http://nrg.wustl.edu/xnat" xsi:schemaLocation="http://github.com/spmic-uon/xnat-hpc schema.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <xnat:label>%s</xnat:label>
-</xnat:mrAssessorData>"""
+  <pipelineName>%s</pipelineName>
+</PipelineData>"""
 
 def get_label(cmd):
     now = datetime.datetime.now()
@@ -37,20 +36,20 @@ def upload_logs(assessor):
 
 def upload_generic_assessor(cmd):
     label = get_label(cmd)
-    xml = GENERIC_ASSESSOR_XML % label
-    print(xml)
+    xml = GENERIC_ASSESSOR_XML % (label, cmd)
+    print("Generic assessor XML:\n", xml)
     with tempfile.NamedTemporaryFile() as f:
         f.write(xml)
 
         cmd = "xnatc --user=%s --password=%s --xnat=%s --project=%s --subject=%s --experiment=%s --create-assessor=%s" % (user, passwd, host, proj, subj, exp, f.name)
         print(cmd)
-        #os.system(cmd)
+        os.system(cmd)
     upload_logs(label)
 
 def upload_assessor(fname):
     # Create an assessor on XNAT from an XML document
     with open(fname, "r") as f:
-        print(f.read())
+        print("Process-generated assessor XML\n", f.read())
 
     cmd = "xnatc --user=%s --password=%s --xnat=%s --project=%s --subject=%s --experiment=%s --create-assessor=%s" % (user, passwd, host, proj, subj, exp, fname)
     print(cmd)
@@ -61,7 +60,7 @@ def upload_assessor(fname):
     root = ET.parse(fname).getroot()
     for label_type in root.findall('{http://nrg.wustl.edu/xnat}label'):
         label = label_type.text
-    print("Label is %s" % label)
+    print("Process-generated assessor label is %s" % label)
 
     assessor_name = os.path.basename(fname).rstrip(".xml")
     resource_dir = os.path.join(uploaddir, assessor_name)
