@@ -19,5 +19,7 @@ PASSWORD=$6
 WORKDIR=$7
 CODEDIR=$8
 
+module load xnatc-img
+
 $CODEDIR/generic/upload $HOST $PROJ $SUB $EXP $USER $PASSWORD $WORKDIR >>$WORKDIR/out.log 2>>$WORKDIR/err.log
 
