@@ -37,19 +37,16 @@ def upload_logs(assessor):
 def upload_generic_assessor(cmd):
     label = get_label(cmd)
     xml = GENERIC_ASSESSOR_XML % (label, cmd)
-    print("Generic assessor XML:\n", xml)
-    with tempfile.NamedTemporaryFile() as f:
+    print("Generic assessor XML:\n%s" % xml)
+    fname = os.path.join(workdir, "temp.xml")
+    with open(fname, "w") as f:
         f.write(xml)
-
-        cmd = "xnatc --user=%s --password=%s --xnat=%s --project=%s --subject=%s --experiment=%s --create-assessor=%s" % (user, passwd, host, proj, subj, exp, f.name)
-        print(cmd)
-        os.system(cmd)
-    upload_logs(label)
+    upload_assessor(fname)
 
 def upload_assessor(fname):
     # Create an assessor on XNAT from an XML document
     with open(fname, "r") as f:
-        print("Process-generated assessor XML\n", f.read())
+        print("Process-generated assessor XML\n%s" % f.read())
 
     cmd = "xnatc --user=%s --password=%s --xnat=%s --project=%s --subject=%s --experiment=%s --create-assessor=%s" % (user, passwd, host, proj, subj, exp, fname)
     print(cmd)
@@ -64,13 +61,14 @@ def upload_assessor(fname):
 
     assessor_name = os.path.basename(fname).rstrip(".xml")
     resource_dir = os.path.join(uploaddir, assessor_name)
-    for dirname in os.listdir(resource_dir):
-        dpath = os.path.join(resource_dir, dirname)
-        if os.path.isdir(dpath):
-            for fname in os.listdir(dpath):
-                fpath = os.path.join(dpath, fname)
-                if os.path.isfile(fpath):
-                    upload_resource(fpath, label, dirname.upper())
+    if os.path.isdir(resource_dir):
+        for dirname in os.listdir(resource_dir):
+            dpath = os.path.join(resource_dir, dirname)
+            if os.path.isdir(dpath):
+                for fname in os.listdir(dpath):
+                    fpath = os.path.join(dpath, fname)
+                    if os.path.isfile(fpath):
+                        upload_resource(fpath, label, dirname.upper())
 
     upload_logs(label)
 
@@ -84,15 +82,15 @@ def upload_resource(fname, assessor, resource_type):
     os.system(cmd)
 
 print("XNAT_HPC: UPLOADER v%s" % __version__)
-if len(sys.argv) != 8:
+if len(sys.argv) != 9:
     raise ValueError("Wrong number of arguments: %i (%s)" % (len(sys.argv), sys.argv))
-host, proj, subj, exp, user, passwd, workdir = sys.argv[1:]
+host, proj, subj, exp, user, passwd, workdir, cmd = sys.argv[1:]
 
 uploaddir = os.path.join(workdir, "xnat-upload")
 if not os.path.exists(uploaddir):
     # FIXME upload logs to where?
-    sys.stderr.write("WARNING: Upload directory %s not found - will create generic assessor to store logs\n")
-    upload_generic_assessor()
+    sys.stderr.write("WARNING: Upload directory %s not found - will create generic assessor to store logs\n" % uploaddir)
+    upload_generic_assessor(cmd)
 else:
     assessor_xmls = list(glob.glob(os.path.join(uploaddir, "*.xml")))
     if len(assessor_xmls) > 1:
@@ -100,6 +98,6 @@ else:
         upload_assessor(assessor_xmls[0])
     elif len(assessor_xmls) == 0:
         sys.stderr.write("WARNING: No assessor XML found - will create generic assessor to store logs")
-        upload_generic_assessor()
+        upload_generic_assessor(cmd)
     else:
         upload_assessor(assessor_xmls[0])

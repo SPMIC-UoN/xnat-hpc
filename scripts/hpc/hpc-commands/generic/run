@@ -38,7 +38,7 @@ PROC_JOB_ID=`sbatch --parsable --dependency=afterany:$STAGE_JOB_ID $SCRIPTDIR/ru
 echo "$SCRIPTNAME processing job ID: $PROC_JOB_ID"
 
 # Submit dependent job upload batch job
-UPLOAD_JOB_ID=`sbatch --parsable --dependency=afterany:$PROC_JOB_ID $CODEDIR/generic/upload.slurm $HOST $PROJ $SUB $EXP ${CREDENTIALS[0]} ${CREDENTIALS[1]} $WORKDIR $CODEDIR`
+UPLOAD_JOB_ID=`sbatch --parsable --dependency=afterany:$PROC_JOB_ID $CODEDIR/generic/upload.slurm $HOST $PROJ $SUB $EXP ${CREDENTIALS[0]} ${CREDENTIALS[1]} $WORKDIR $CODEDIR $SCRIPTNAME`
 echo "$SCRIPTNAME upload job ID: $UPLOAD_JOB_ID"
 
 # Submit dependent cleanup job
