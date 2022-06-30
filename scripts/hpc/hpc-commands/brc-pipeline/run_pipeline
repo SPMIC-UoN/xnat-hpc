@@ -1,0 +1,41 @@
+#!/bin/env python3
+"""
+Script to run the BRC pipeline from a BIDS dataset
+
+Currently the structural pipeline only
+"""
+import sys
+import subprocess
+
+import bids
+
+__version__ = "0.0.1"
+
+print("BRC Structural Pipeline - BIDS runner: %s" % sys.argv)
+bidsdir = sys.argv[1]
+outdir = sys.argv[2]
+layout = bids.BIDSLayout(bidsdir)
+
+for subject in layout.get_subjects():
+    for session in layout.get_sessions():
+        t1s = layout.get(subject=subject, session=session, extension='nii.gz', suffix='T1w', return_type='filename')
+        print(t1s)
+        if len(t1s) == 0:
+            raise RuntimeError(f"Cannot run structural pipeline for subject {subject} session {session} - no T1w image found")
+        if len(t1s) > 1:
+            sys.stderr.write(f"WARNING: More than one T1w image found for subject {subject} session {session}: {t1s} - using first\n")
+        t1 = t1s[0]
+
+        t2s = layout.get(subject=subject, session=session, extension='nii.gz', suffix='T2w', return_type='filename')
+        if len(t2s) == 0:
+            t2s = [None]
+        elif len(t2s) > 1:
+            sys.stderr.write(f"WARNING: More than one T2w image found for subject {subject} session {session}: {t2s} - using first\n")
+        t2 = t2s[0]
+
+        cmd = f'struc_preproc.sh --input "{t1}" --path "{outdir}" --subject {subject}_{session}'
+        if t2:
+            cmd += f' --t2 "{t2}"'
+        stdout = subprocess.check_output(cmd)
+        jobid = stdout.split()[1]
+        print(jobid)
