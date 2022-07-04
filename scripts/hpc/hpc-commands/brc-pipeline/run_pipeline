@@ -4,6 +4,7 @@ Script to run the BRC pipeline from a BIDS dataset
 
 Currently the structural pipeline only
 """
+import os
 import sys
 import subprocess
 
@@ -41,3 +42,10 @@ for subject in layout.get_subjects():
         for line in stdout.splitlines():
             if line.startswith("jobID"):
                 print(line.split()[1])
+
+        # IDP extraction
+        subjfile = os.path.join(outdir, "subjs.txt")
+        with open(subjfile, "w") as f:
+            f.write(f'{subject}_{session}')
+        idpdir = os.path.join(outdir, 'idps')
+        cmd_idp = ['idp_extract.sh', '--in', subjfile, '--indir', outdir, '--outdir', idpdir]
