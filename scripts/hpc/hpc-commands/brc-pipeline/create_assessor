@@ -42,7 +42,7 @@ def copy_file(srcdir, path, destdir):
 
 def get_subjdir(brcdir):
     subjdirs = [os.path.join(brcdir, d) for d in os.listdir(brcdir)]
-    subjdirs = [d for d in subjdirs if os.path.isdir(d)]
+    subjdirs = [d for d in subjdirs if os.path.isdir(d) and not d.endswith("/idps")]
     if len(subjdirs) == 0:
         sys.stderr.write("WARNING: No subject directories found, no data will be uploaded")
         return
