@@ -14,7 +14,6 @@ the logs may be useful to the user.s
 import glob
 import sys
 import os
-import tempfile
 import datetime
 
 __version__ = "0.0.1"
@@ -22,6 +21,7 @@ __version__ = "0.0.1"
 GENERIC_ASSESSOR_XML = """<?xml version="1.0" encoding="UTF-8"?>
 <PipelineData xmlns="http://github.com/spmic-uon/xnat-hpc" xmlns:xnat="http://nrg.wustl.edu/xnat" xsi:schemaLocation="http://github.com/spmic-uon/xnat-hpc schema.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <xnat:label>%s</xnat:label>
+  <xnat:date>%s</xnat:date>
   <pipelineName>%s</pipelineName>
 </PipelineData>"""
 
@@ -36,7 +36,8 @@ def upload_logs(assessor):
 
 def upload_generic_assessor(cmd):
     label = get_label(cmd)
-    xml = GENERIC_ASSESSOR_XML % (label, cmd)
+    date = datetime.datetime.today().strftime('%Y-%m-%d')
+    xml = GENERIC_ASSESSOR_XML % (label, date, cmd)
     print("Generic assessor XML:\n%s" % xml)
     fname = os.path.join(workdir, "temp.xml")
     with open(fname, "w") as f:
