@@ -7,6 +7,8 @@ import os
 import shutil
 import datetime
 
+import pandas as pd
+
 __version__ = "0.0.1"
 
 XML_HEADER = """<?xml version="1.0" encoding="UTF-8"?>
@@ -23,7 +25,7 @@ def get_label(cmd):
     timestamp = now.strftime("%Y%m%d_%H%M%S")
     return f"{cmd}_{timestamp}"
 
-def create_assessor_xml():
+def create_assessor_xml(assessordir):
     json_files = []
     label = get_label("BRC_PIPELINE")
     xml = XML_HEADER % (label, __version__, "BRC Pipeline")
@@ -38,19 +40,39 @@ def copy_file(srcdir, path, destdir):
     if os.path.exists(srcfile):
         shutil.copy(srcfile, destdir)
 
-def create_resource_files(brcdir):
-    subjdirs = os.listdir(brcdir)
+def get_subjdir(brcdir):
+    subjdirs = [os.path.join(brcdir, d) for d in os.listdir(brcdir)]
+    subjdirs = [d for d in subjdirs if os.path.isdir(d)]
     if len(subjdirs) == 0:
         sys.stderr.write("WARNING: No subject directories found, no data will be uploaded")
         return
     elif len(subjdirs) > 1:
         sys.stderr.write("WARNING: Multiple subject directories found: %s - using first" % subjdirs)
-    subjdir = os.path.join(brcdir, subjdirs[0])
-    nifti_dir = os.path.join(assessordir, "brc", "NIFTI")
-    os.makedirs(nifti_dir, exist_ok=True)
+    return subjdirs[0]
 
-    copy_file(subjdir, "raw/anatMRI/T2/T2_orig_defaced.nii.gz", nifti_dir)
-    copy_file(subjdir, "raw/anatMRI/T1/T1_orig_defaced.nii.gz", nifti_dir)
+def create_resource_files(brcdir, assessordir):
+    subjdir = get_subjdir(brcdir)
+    if subjdir:
+        nifti_dir = os.path.join(assessordir, "brc", "NIFTI")
+        os.makedirs(nifti_dir, exist_ok=True)
+        copy_file(subjdir, "raw/anatMRI/T2/T2_orig_defaced.nii.gz", nifti_dir)
+        copy_file(subjdir, "raw/anatMRI/T1/T1_orig_defaced.nii.gz", nifti_dir)
+
+def create_idp_resource(brcdir, assessordir):
+    subjdir = get_subjdir(brcdir)
+    if subjdir:
+        idp_dir = os.path.join(assessordir, "brc", "IDPS")
+        os.makedirs(idp_dir, exist_ok=True)
+
+        idps_file = os.path.join(subjdir, "analysis/IDP_files/IDPs.txt")
+        idp_names_file = os.path.join(os.environ["BRC_GLOBAL_DIR"], "config", "IDP_list.txt")
+        idp_names = pd.read_csv(idp_names_file, sep="\s+", header=None)
+        with open(idps_file, "r") as f:
+            idps = f.read().split()
+
+        with open(os.path.join(idp_dir, "IDPS.tsv"), "w") as f:
+            f.write("SubjID\t" + "\t".join(idp_names[1]) + "\n")
+            f.write("\t".join(idps) + "\n")
 
 print("BRC pipeline - Create assessor: %s" % sys.argv)
 workdir = sys.argv[1]
@@ -58,5 +80,6 @@ brcdir = os.path.join(workdir, "brc_out")
 assessordir = os.path.join(workdir, "xnat-upload")
 os.makedirs(assessordir, exist_ok=True)
 
-create_assessor_xml()
-create_resource_files(brcdir)
+create_assessor_xml(assessordir)
+create_resource_files(brcdir, assessordir)
+create_idp_resource(brcdir, assessordir)
