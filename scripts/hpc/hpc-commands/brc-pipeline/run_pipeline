@@ -39,9 +39,6 @@ for subject in layout.get_subjects():
         stdout = subprocess.check_output(cmd)
         stdout = stdout.decode("UTF-8")
         sys.stderr.write(stdout)
-        for line in stdout.splitlines():
-            if line.startswith("jobID"):
-                print(line.split()[1])
 
         # IDP extraction
         subjfile = os.path.join(outdir, "subjs.txt")
@@ -49,3 +46,7 @@ for subject in layout.get_subjects():
             f.write(f'{subject}_{session}')
         idpdir = os.path.join(outdir, 'idps')
         cmd_idp = ['idp_extract.sh', '--in', subjfile, '--indir', outdir, '--outdir', idpdir]
+        stdout = subprocess.check_output(cmd_idp)
+        stdout = stdout.decode("UTF-8")
+        sys.stderr.write(stdout)
+
