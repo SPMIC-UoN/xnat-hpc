@@ -54,9 +54,20 @@ def create_resource_files(brcdir, assessordir):
     subjdir = get_subjdir(brcdir)
     if subjdir:
         nifti_dir = os.path.join(assessordir, "brc", "NIFTI")
+        trans_dir = os.path.join(assessordir, "brc", "TRANSFORMS")
         os.makedirs(nifti_dir, exist_ok=True)
+        os.makedirs(trans_dir, exist_ok=True)
         copy_file(subjdir, "raw/anatMRI/T2/T2_orig_defaced.nii.gz", nifti_dir)
+        copy_file(subjdir, "analysis/anatMRI/T2/preproc/reg/T2_2_std_warp_field.nii.gz", trans_dir)
+        copy_file(subjdir, "analysis/anatMRI/T2/preproc/reg/T2_2_std.mat", trans_dir)
         copy_file(subjdir, "raw/anatMRI/T1/T1_orig_defaced.nii.gz", nifti_dir)
+        copy_file(subjdir, "analysis/anatMRI/T1/preproc/reg/T1_2_std_warp_field.nii.gz", trans_dir)
+        copy_file(subjdir, "analysis/anatMRI/T1/preproc/reg/T1_2_std.mat", trans_dir)
+        copy_file(subjdir, "analysis/anatMRI/T1/processed/data/T1_unbiased.nii.gz", nifti_dir)
+        copy_file(subjdir, "analysis/anatMRI/T1/processed/data/T1_unbiased_brain.nii.gz", nifti_dir)
+        copy_file(subjdir, "analysis/anatMRI/T1/processed/seg/tissue/multi_chan/T1_pve_CSF.nii.gz", nifti_dir)
+        copy_file(subjdir, "analysis/anatMRI/T1/processed/seg/tissue/multi_chan/T1_pve_GM.nii.gz", nifti_dir)
+        copy_file(subjdir, "analysis/anatMRI/T1/processed/seg/tissue/multi_chan/T1_pve_WM.nii.gz", nifti_dir)
 
 def create_idp_resource(brcdir, assessordir):
     subjdir = get_subjdir(brcdir)
